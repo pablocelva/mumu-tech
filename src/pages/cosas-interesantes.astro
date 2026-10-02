@@ -1,0 +1,38 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SectionHeader from '../components/SectionHeader.astro';
+import Card from '../components/Card.astro';
+import { contentRepository } from '../repositories/content.repository';
+
+const projects = await contentRepository.getItemsByCategory('cosas-interesantes');
+---
+
+<Layout
+  title="Cosas Interesantes & DIY | Mumu Tech"
+  description="Proyectos DIY, video sintetizadores analógicos, circuit bending, modificaciones de cinta magnética y experimentos de audio lo-fi."
+>
+  <div class="container" style="max-width: 1100px; margin: 0 auto; padding: 0 1.5rem 4rem 1.5rem;">
+    
+    <SectionHeader
+      title="COSAS INTERESANTES & DIY"
+      descriptions={[
+        "Aquí comparto esquemáticos, bitácoras de construcción y experimentos libres con artefactos electrónicos que no entran en las categorías tradicionales: desde generadores de feedback de video para monitores CRT hasta sintetizadores construidos con chips lógicos CMOS y grabadoras de cinta modificadas.",
+        "La mayoría de estos proyectos son de código abierto / open hardware. Si construyes tu propia versión basándote en estas guías, etiquétanos o compártelo para seguir expandiendo la comunidad DIY de habla hispana.",
+        "Próximamente también tendremos kits DIY listos para armar y artefactos únicos disponibles en nuestra tienda."
+      ]}
+    />
+
+    <hr class="retroDivider" style="width: 100%; height: 1px; background: rgba(255, 255, 255, 0.2); border: none; margin: 2.5rem 0;" />
+
+    <section aria-label="Listado de Proyectos DIY">
+      {projects.map((project) => (
+        <Card
+          item={project}
+          ctaText="VER DETALLES / GUÍA"
+          ctaHref={`/contacto?interest=proyecto&item=${encodeURIComponent(project.title)}`}
+        />
+      ))}
+    </section>
+
+  </div>
+</Layout>

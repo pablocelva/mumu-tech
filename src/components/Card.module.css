@@ -1,0 +1,120 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  background: rgba(18, 18, 26, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 2px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  margin-bottom: 2.5rem;
+}
+
+.card:hover {
+  border-color: rgba(0, 240, 255, 0.5);
+  box-shadow: 0 12px 36px rgba(0, 240, 255, 0.15);
+}
+
+.cardHorizontal {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .cardHorizontal {
+    grid-template-columns: 1.25fr 1fr;
+    align-items: stretch;
+  }
+}
+
+.contentCol {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.codeTitle {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #ffffff;
+  margin-bottom: 1rem;
+  line-height: 1.3;
+}
+
+.codePrefix {
+  color: #00f0ff;
+  margin-right: 0.4rem;
+}
+
+.description {
+  font-size: 0.96rem;
+  line-height: 1.65;
+  color: #d6d6e6;
+  margin-bottom: 1.25rem;
+}
+
+.detailsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.mediaCol {
+  position: relative;
+  overflow: hidden;
+  min-height: 240px;
+  background: #000000;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+  filter: contrast(105%) brightness(95%);
+}
+
+.card:hover .image {
+  transform: scale(1.04);
+}
+
+.footerActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.priceTag {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #39ff14;
+}
+
+/* Home Grid Card variant */
+.gridCard {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.gridCard .mediaCol {
+  height: 200px;
+  min-height: 200px;
+}
+
+.gridCard .contentCol {
+  padding: 1.5rem;
+  flex: 1;
+}

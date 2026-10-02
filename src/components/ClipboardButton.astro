@@ -1,0 +1,66 @@
+---
+import styles from './ClipboardButton.module.css';
+
+interface Props {
+  textToCopy: string;
+  label?: string;
+  successMessage?: string;
+}
+
+const {
+  textToCopy,
+  label = 'COPIAR CORREO',
+  successMessage = '¡COPIADO AL PORTAPAPELES!',
+} = Astro.props;
+
+const buttonId = `clipboard-btn-${Math.random().toString(36).substring(2, 8)}`;
+---
+
+<div class={styles.wrapper}>
+  <button
+    type="button"
+    id={buttonId}
+    class={styles.copyBtn}
+    data-copy={textToCopy}
+    aria-label={`${label}: ${textToCopy}`}
+  >
+    <svg class={styles.icon} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M16 1H4C2.9 1 2 1.9 2 3v14h2V3h12V1zm3 4H8C6.9 5 6 5.9 6 7v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <span>{label} ({textToCopy})</span>
+  </button>
+  <span id={`${buttonId}-tooltip`} class={styles.tooltip} role="status" aria-live="polite">
+    {successMessage}
+  </span>
+</div>
+
+<script define:vars={{ buttonId }}>
+  const btn = document.getElementById(buttonId);
+  const tooltip = document.getElementById(`${buttonId}-tooltip`);
+
+  if (btn && tooltip) {
+    btn.addEventListener('click', async () => {
+      const text = btn.getAttribute('data-copy');
+      if (text) {
+        try {
+          if (navigator.clipboard) {
+            await navigator.clipboard.writeText(text);
+          } else {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+          }
+          tooltip.classList.add(styles.visible || 'visible');
+          setTimeout(() => {
+            tooltip.classList.remove(styles.visible || 'visible');
+          }, 2500);
+        } catch (err) {
+          console.error('Copy failed:', err);
+        }
+      }
+    });
+  }
+</script>

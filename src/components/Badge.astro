@@ -1,0 +1,14 @@
+---
+import styles from './Badge.module.css';
+
+interface Props {
+  variant?: 'default' | 'pink' | 'cyan' | 'lime' | 'purple';
+  class?: string;
+}
+
+const { variant = 'default', class: className = '' } = Astro.props;
+---
+
+<span class:list={[styles.badge, styles[variant], className]}>
+  <slot />
+</span>

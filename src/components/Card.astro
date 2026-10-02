@@ -1,0 +1,79 @@
+---
+import styles from './Card.module.css';
+import Badge from './Badge.astro';
+import Button from './Button.astro';
+import { getOptimizedImageUrl } from '../lib/cloudinary';
+import type { ContentItem } from '../types';
+
+interface Props {
+  item: ContentItem;
+  layout?: 'horizontal' | 'grid';
+  ctaText?: string;
+  ctaHref?: string;
+}
+
+const { item, layout = 'horizontal', ctaText = 'CONSULTAR / DETALLES', ctaHref } = Astro.props;
+
+const actionHref = ctaHref || `/contacto?interest=${item.category === 'educativa' ? 'taller' : item.category === 'servicios' ? 'servicio' : 'proyecto'}&item=${encodeURIComponent(item.title)}`;
+
+const optimizedImg = getOptimizedImageUrl(item.imageUrl, { width: 800, quality: 'auto', format: 'auto' });
+
+const getCategoryVariant = (cat: string) => {
+  if (cat === 'educativa') return 'pink';
+  if (cat === 'servicios') return 'cyan';
+  return 'lime';
+};
+---
+
+<article class:list={[styles.card, layout === 'horizontal' ? styles.cardHorizontal : styles.gridCard]}>
+  <div class={styles.contentCol}>
+    <div>
+      <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
+        <Badge variant={getCategoryVariant(item.category)}>
+          {item.category === 'educativa' ? 'TALLER DIY' : item.category === 'servicios' ? 'SERVICIO' : 'PROYECTO'}
+        </Badge>
+        {item.tags.map((tag) => (
+          <Badge>{tag}</Badge>
+        ))}
+      </div>
+
+      <h2 class={styles.codeTitle}>
+        <span class={styles.codePrefix}>{item.code} —</span>
+        {item.title}
+      </h2>
+
+      <p class={styles.description}>{item.summary}</p>
+    </div>
+
+    <div class={styles.footerActions}>
+      {'price' in item && item.price ? (
+        <span class={styles.priceTag}>
+          ${item.price.toLocaleString('es-CL')} CLP
+        </span>
+      ) : 'startingPrice' in item && item.startingPrice ? (
+        <span class={styles.priceTag}>
+          Desde ${item.startingPrice.toLocaleString('es-CL')} CLP
+        </span>
+      ) : (
+        <span class={styles.priceTag} style="color: #00f0ff;">
+          OPEN SOURCE DIY
+        </span>
+      )}
+
+      <Button href={actionHref} size="sm" variant={item.category === 'educativa' ? 'accentPink' : 'secondary'}>
+        {ctaText}
+      </Button>
+    </div>
+  </div>
+
+  <div class={styles.mediaCol}>
+    <img
+      src={optimizedImg}
+      alt={item.imageAlt || item.title}
+      loading="lazy"
+      class={styles.image}
+      width="800"
+      height="500"
+    />
+  </div>
+</article>

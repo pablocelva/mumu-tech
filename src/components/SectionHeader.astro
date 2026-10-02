@@ -1,0 +1,18 @@
+---
+import styles from './SectionHeader.module.css';
+
+interface Props {
+  title: string;
+  descriptions?: string[];
+}
+
+const { title, descriptions = [] } = Astro.props;
+---
+
+<div class={styles.wrapper}>
+  <h1 class={styles.title}>{title}</h1>
+  {descriptions.map((desc) => (
+    <p class={styles.description}>{desc}</p>
+  ))}
+  <slot />
+</div>

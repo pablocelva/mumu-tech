@@ -1,0 +1,83 @@
+.container {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.frostedCard {
+  background: rgba(18, 18, 24, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-sm);
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.frostedCard:hover {
+  border-color: rgba(0, 240, 255, 0.4);
+}
+
+.retroDivider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.05));
+  border: none;
+  margin: 2rem 0;
+}
+
+.gridCards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+@media (min-width: 768px) {
+  .gridCards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .gridCards3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.badgePink {
+  border-color: var(--color-accent-pink);
+  color: #ff94c2;
+  background: rgba(255, 42, 133, 0.15);
+}
+
+.badgeCyan {
+  border-color: var(--color-accent-cyan);
+  color: #70f4ff;
+  background: rgba(0, 240, 255, 0.15);
+}
+
+.badgeLime {
+  border-color: var(--color-accent-lime);
+  color: #8aff75;
+  background: rgba(57, 255, 20, 0.15);
+}

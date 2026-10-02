@@ -1,0 +1,152 @@
+---
+import styles from './ContactForm.module.css';
+import Button from './Button.astro';
+
+interface Props {
+  initialInterest?: string;
+}
+
+const { initialInterest = 'taller' } = Astro.props;
+---
+
+<form id="contact-form" class={styles.form} novalidate>
+  <div id="form-status" class={styles.statusMessage} role="alert" aria-live="polite"></div>
+
+  <div class={styles.fieldGroup}>
+    <label for="contact-name" class={styles.label}>Nombre o Apodo *</label>
+    <input
+      type="text"
+      id="contact-name"
+      name="name"
+      required
+      minlength="2"
+      placeholder="Ej: Jimi / Valery"
+      class={styles.input}
+      autocomplete="name"
+    />
+  </div>
+
+  <div class={styles.fieldGroup}>
+    <label for="contact-email" class={styles.label}>Correo Electrónico *</label>
+    <input
+      type="email"
+      id="contact-email"
+      name="email"
+      required
+      placeholder="tu-correo@ejemplo.com"
+      class={styles.input}
+      autocomplete="email"
+    />
+  </div>
+
+  <div class={styles.fieldGroup}>
+    <label for="contact-phone" class={styles.label}>Teléfono / WhatsApp (Opcional)</label>
+    <input
+      type="tel"
+      id="contact-phone"
+      name="phone"
+      placeholder="+56 9 1234 5678"
+      class={styles.input}
+      autocomplete="tel"
+    />
+  </div>
+
+  <div class={styles.fieldGroup}>
+    <label for="contact-interest" class={styles.label}>Motivo o Interés *</label>
+    <select id="contact-interest" name="interest" class={styles.select} required>
+      <option value="taller" selected={initialInterest === 'taller'}>Talleres Educativos / Crear Pedales</option>
+      <option value="servicio" selected={initialInterest === 'servicio'}>Reparación o Modificación de Equipos</option>
+      <option value="proyecto" selected={initialInterest === 'proyecto'}>Proyectos DIY / Colaboración / Hack</option>
+      <option value="newsletter" selected={initialInterest === 'newsletter'}>Suscripción a Novedades / Mailing</option>
+      <option value="otro" selected={initialInterest === 'otro'}>Otra Consulta General</option>
+    </select>
+  </div>
+
+  <div class={styles.fieldGroup}>
+    <label for="contact-message" class={styles.label}>Mensaje o Detalles del Equipo / Idea *</label>
+    <textarea
+      id="contact-message"
+      name="message"
+      required
+      minlength="10"
+      rows="4"
+      placeholder="Cuéntame qué pedal quieres armar, qué equipo necesita reparación o qué duda técnica tienes..."
+      class={styles.textarea}
+    ></textarea>
+  </div>
+
+  <label class={styles.checkboxContainer}>
+    <input
+      type="checkbox"
+      id="contact-newsletter"
+      name="subscribeNewsletter"
+      value="true"
+      class={styles.checkbox}
+      checked
+    />
+    <span>Deseo recibir avisos de nuevos talleres, cupos y guías DIY (Mailing list)</span>
+  </label>
+
+  <Button type="submit" variant="primary" size="lg" fullWidth id="submit-btn">
+    ENVIAR MENSAJE / POSTULAR
+  </Button>
+</form>
+
+<script>
+  const form = document.getElementById('contact-form') as HTMLFormElement | null;
+  const statusDiv = document.getElementById('form-status');
+  const submitBtn = document.getElementById('submit-btn');
+
+  if (form && statusDiv && submitBtn) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      submitBtn.setAttribute('disabled', 'true');
+      submitBtn.textContent = 'ENVIANDO...';
+      statusDiv.className = '';
+      statusDiv.textContent = '';
+      statusDiv.style.display = 'none';
+
+      const formData = new FormData(form);
+      const data = {
+        name: formData.get('name'),
+        email: formData.get('email'),
+        phone: formData.get('phone') || undefined,
+        interest: formData.get('interest'),
+        message: formData.get('message'),
+        subscribeNewsletter: formData.get('subscribeNewsletter') === 'true',
+      };
+
+      try {
+        const res = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+
+        const result = await res.json();
+
+        if (res.ok && result.success) {
+          statusDiv.className = 'statusSuccess';
+          statusDiv.style.cssText = 'display: block; background: rgba(57, 255, 20, 0.15); border: 1px solid #39ff14; color: #8aff75; padding: 1rem; margin-bottom: 1rem; border-radius: 2px; font-family: monospace;';
+          statusDiv.textContent = '✓ ' + (result.message || '¡Mensaje recibido con éxito! Te responderé a la brevedad.');
+          form.reset();
+        } else {
+          statusDiv.style.cssText = 'display: block; background: rgba(255, 42, 133, 0.15); border: 1px solid #ff2a85; color: #ff94c2; padding: 1rem; margin-bottom: 1rem; border-radius: 2px; font-family: monospace;';
+          statusDiv.textContent = '⚠ ' + (result.error || 'Hubo un error al procesar el envío. Revisa los datos.');
+        }
+      } catch (err) {
+        statusDiv.style.cssText = 'display: block; background: rgba(255, 42, 133, 0.15); border: 1px solid #ff2a85; color: #ff94c2; padding: 1rem; margin-bottom: 1rem; border-radius: 2px; font-family: monospace;';
+        statusDiv.textContent = '⚠ Error de conexión. Intenta nuevamente o contáctame por WhatsApp.';
+      } finally {
+        submitBtn.removeAttribute('disabled');
+        submitBtn.textContent = 'ENVIAR MENSAJE / POSTULAR';
+      }
+    });
+  }
+</script>

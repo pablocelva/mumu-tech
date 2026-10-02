@@ -1,0 +1,47 @@
+---
+import styles from './Button.module.css';
+
+interface Props {
+  href?: string;
+  variant?: 'primary' | 'secondary' | 'outline' | 'accentPink';
+  size?: 'sm' | 'md' | 'lg';
+  fullWidth?: boolean;
+  type?: 'button' | 'submit' | 'reset';
+  class?: string;
+  id?: string;
+  target?: string;
+  rel?: string;
+}
+
+const {
+  href,
+  variant = 'primary',
+  size = 'md',
+  fullWidth = false,
+  type = 'button',
+  class: className = '',
+  id,
+  target,
+  rel,
+} = Astro.props;
+
+const classNames = [
+  styles.button,
+  styles[variant],
+  size !== 'md' ? styles[size] : '',
+  fullWidth ? styles.fullWidth : '',
+  className,
+].filter(Boolean).join(' ');
+---
+
+{
+  href ? (
+    <a href={href} class={classNames} id={id} target={target} rel={rel}>
+      <slot />
+    </a>
+  ) : (
+    <button type={type} class={classNames} id={id}>
+      <slot />
+    </button>
+  )
+}

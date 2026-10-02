@@ -1,0 +1,81 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.4rem;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  text-align: center;
+  border: 1px solid transparent;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.primary {
+  background: #ffffff;
+  color: #0d0d11;
+  border-color: #ffffff;
+}
+
+.primary:hover {
+  background: #00f0ff;
+  border-color: #00f0ff;
+  box-shadow: 0 0 16px rgba(0, 240, 255, 0.6);
+  transform: translateY(-2px);
+}
+
+.secondary {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(4px);
+}
+
+.secondary:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: #ffffff;
+  transform: translateY(-2px);
+}
+
+.outline {
+  background: transparent;
+  color: #00f0ff;
+  border-color: #00f0ff;
+}
+
+.outline:hover {
+  background: rgba(0, 240, 255, 0.15);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
+}
+
+.accentPink {
+  background: #ff2a85;
+  color: #ffffff;
+  border-color: #ff2a85;
+}
+
+.accentPink:hover {
+  background: #ff529f;
+  box-shadow: 0 0 16px rgba(255, 42, 133, 0.6);
+  transform: translateY(-2px);
+}
+
+.sm {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.78rem;
+}
+
+.lg {
+  padding: 0.85rem 1.8rem;
+  font-size: 1rem;
+}
+
+.fullWidth {
+  width: 100%;
+}

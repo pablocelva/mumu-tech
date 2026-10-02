@@ -1,0 +1,38 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SectionHeader from '../components/SectionHeader.astro';
+import Card from '../components/Card.astro';
+import { contentRepository } from '../repositories/content.repository';
+
+const services = await contentRepository.getItemsByCategory('servicios');
+---
+
+<Layout
+  title="Servicios Técnicos & Modificaciones | Mumu Tech"
+  description="Servicio técnico especializado en pedales de guitarra, amplificadores valvulares, cambio de switches true bypass y modificaciones sonoras a medida."
+>
+  <div class="container" style="max-width: 1100px; margin: 0 auto; padding: 0 1.5rem 4rem 1.5rem;">
+    
+    <SectionHeader
+      title="SERVICIOS TÉCNICOS & MODS"
+      descriptions={[
+        "¿Tu pedal favorito mete ruido, mete zumbido o dejó de encender? ¿Quieres modificar la respuesta de tu distorsión clásica o adaptar un pedal vintage a 9V estándar? Ofrecemos diagnóstico transparente y reparación a nivel de componente.",
+        "Trabajamos con componentes de alta fidelidad, estaño con plata para máxima conductividad y realizamos pruebas exhaustivas de señal en osciloscopio y amplificador antes de cada entrega.",
+        "Aceptamos envíos desde todo el país y entregas directas en taller previa coordinación."
+      ]}
+    />
+
+    <hr class="retroDivider" style="width: 100%; height: 1px; background: rgba(255, 255, 255, 0.2); border: none; margin: 2.5rem 0;" />
+
+    <section aria-label="Listado de Servicios Técnicos">
+      {services.map((service) => (
+        <Card
+          item={service}
+          ctaText="COTIZAR REPARACIÓN"
+          ctaHref={`/contacto?interest=servicio&item=${encodeURIComponent(service.title)}`}
+        />
+      ))}
+    </section>
+
+  </div>
+</Layout>

@@ -1,0 +1,138 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SectionHeader from '../components/SectionHeader.astro';
+import Button from '../components/Button.astro';
+import Badge from '../components/Badge.astro';
+import { contentRepository } from '../repositories/content.repository';
+
+const featuredWorkshops = await contentRepository.getItemsByCategory('educativa');
+const featuredServices = await contentRepository.getItemsByCategory('servicios');
+const featuredProjects = await contentRepository.getItemsByCategory('cosas-interesantes');
+
+const sectionsOverview = [
+  {
+    code: 'SEC-01',
+    title: 'EDUCATIVA & TALLERES',
+    description: 'Aprende electrónica práctica construyendo tus propios pedales de efectos de guitarra, sintetizadores de ruido analógicos y dominando el arte de la soldadura.',
+    href: '/educativa',
+    imageUrl: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=800&q=80',
+    imageAlt: 'Taller de pedales de guitarra DIY',
+    badge: 'TALLERES DIY',
+    variant: 'pink' as const,
+  },
+  {
+    code: 'SEC-02',
+    title: 'SERVICIOS TÉCNICOS & MODS',
+    description: 'Reparación especializada, calibración de bias, cambio de switches true-bypass y modificaciones audiófilas de circuito para pedales y amplificadores.',
+    href: '/servicios',
+    imageUrl: 'https://images.unsplash.com/photo-1525201548942-d8732f6617a0?auto=format&fit=crop&w=800&q=80',
+    imageAlt: 'Reparación de circuitos de audio y pedales',
+    badge: 'REPARACIONES',
+    variant: 'cyan' as const,
+  },
+  {
+    code: 'SEC-03',
+    title: 'COSAS INTERESANTES & DIY',
+    description: 'Bitácora de experimentos libres, video sintetizadores analógicos, modificaciones de cassette tapes, circuit bending y guías de construcción.',
+    href: '/cosas-interesantes',
+    imageUrl: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80',
+    imageAlt: 'Video sintetizador glitch analógico',
+    badge: 'EXPERIMENTOS',
+    variant: 'lime' as const,
+  },
+];
+---
+
+<Layout
+  title="Mumu Tech | Taller de Electrónica DIY, Pedales y Reparaciones"
+  description="Laboratorio técnico independiente: talleres de pedales de guitarra, sintetizadores, reparaciones de audio y modificaciones analógicas."
+>
+  <div class="container" style="max-width: 1100px; margin: 0 auto; padding: 0 1.5rem 4rem 1.5rem;">
+    
+    <!-- Hero / Intro Section Header -->
+    <SectionHeader
+      title="MUMU TECH"
+      descriptions={[
+        "¡Bienvenido a Mumu Tech! Un espacio dedicado a la electrónica analógica artesanal, la creación de pedales de guitarra, modificaciones de equipos de audio, rescate de tecnología vintage y experimentación sonora.",
+        "Aquí encontrarás talleres prácticos donde ensamblas tus propios artefactos desde cero, servicios técnicos especializados para revivir o potenciar tus pedales y amplificadores, y una bitácora abierta de proyectos lo-fi entretenidos."
+      ]}
+    >
+      <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem; flex-wrap: wrap;">
+        <Button href="/educativa" variant="accentPink" size="lg">
+          VER PRÓXIMOS TALLERES
+        </Button>
+        <Button href="/contacto" variant="secondary" size="lg">
+          CONTACTAR / COTIZAR
+        </Button>
+      </div>
+    </SectionHeader>
+
+    <hr class="retroDivider" style="width: 100%; height: 1px; background: rgba(255, 255, 255, 0.2); border: none; margin: 3rem 0;" />
+
+    <!-- Main Section Cards Summary -->
+    <section aria-labelledby="secciones-principales">
+      <div style="text-align: center; margin-bottom: 2.5rem;">
+        <h2 id="secciones-principales" style="font-family: var(--font-mono); font-size: 1.3rem; color: #00f0ff; letter-spacing: 0.08em; text-transform: uppercase;">
+          [ EXPLORAR EL TALLER ]
+        </h2>
+        <p style="color: #c4c4d4; font-size: 0.95rem; margin-top: 0.4rem;">
+          Conoce nuestras tres áreas de trabajo y proyectos activos
+        </p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+        {sectionsOverview.map((sec) => (
+          <article style="background: rgba(18, 18, 26, 0.82); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 2px; overflow: hidden; display: flex; flex-direction: column; transition: all 0.2s ease; box-shadow: 0 8px 30px rgba(0,0,0,0.4);">
+            <div style="height: 200px; overflow: hidden; background: #000;">
+              <img
+                src={sec.imageUrl}
+                alt={sec.imageAlt}
+                loading="lazy"
+                width="800"
+                height="450"
+                style="width: 100%; height: 100%; object-fit: cover; filter: contrast(105%) brightness(95%);"
+              />
+            </div>
+            <div style="padding: 1.75rem; display: flex; flex-direction: column; justify-content: space-between; flex: 1;">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                  <Badge variant={sec.variant}>{sec.badge}</Badge>
+                  <span style="font-family: var(--font-mono); font-size: 0.75rem; color: #888899;">{sec.code}</span>
+                </div>
+                <h3 style="font-family: system-ui, sans-serif; font-size: 1.25rem; font-weight: 800; color: #ffffff; text-transform: uppercase; margin-bottom: 0.75rem; line-height: 1.2;">
+                  {sec.title}
+                </h3>
+                <p style="color: #d6d6e6; font-size: 0.92rem; line-height: 1.6; margin-bottom: 1.5rem;">
+                  {sec.description}
+                </p>
+              </div>
+
+              <Button href={sec.href} variant="primary" fullWidth size="md">
+                IR A {sec.title.split('&')[0].trim()} →
+              </Button>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <!-- Quick Highlights Banner -->
+    <section style="margin-top: 4.5rem; background: rgba(15, 15, 20, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: 2px; padding: 2.5rem; text-align: center; box-shadow: 0 0 30px rgba(0, 240, 255, 0.1);">
+      <h2 style="font-family: system-ui, sans-serif; font-size: 1.6rem; font-weight: 800; text-transform: uppercase; color: #ffffff; margin-bottom: 1rem;">
+        ¿TIENES UN EQUIPO CON FALLAS O UN PROYECTO EN MENTE?
+      </h2>
+      <p style="color: #d0d0e2; font-size: 1rem; max-width: 650px; margin: 0 auto 1.75rem auto; line-height: 1.6;">
+        Hablemos directamente por WhatsApp o correo. Cuéntame sobre el sonido que buscas, el pedal que quieres modificar o reserva tu cupo para el próximo taller presencial.
+      </p>
+      <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+        <Button href="https://wa.me/56900000000" target="_blank" rel="noopener noreferrer" variant="accentPink" size="md">
+          WHATSAPP DIRECTO
+        </Button>
+        <Button href="/contacto" variant="secondary" size="md">
+          FORMULARIO & CORREO
+        </Button>
+      </div>
+    </section>
+
+  </div>
+</Layout>

@@ -1,0 +1,54 @@
+---
+import { DEFAULT_SITE_METADATA, generateLocalBusinessSchema, type SeoMetadataProps } from '../lib/seo';
+
+interface Props extends SeoMetadataProps {
+  structuredData?: Record<string, unknown>;
+}
+
+const {
+  title = DEFAULT_SITE_METADATA.title,
+  description = DEFAULT_SITE_METADATA.description,
+  canonical,
+  image = DEFAULT_SITE_METADATA.image,
+  type = 'website',
+  author = 'Mumu Tech',
+  structuredData = generateLocalBusinessSchema(),
+} = Astro.props;
+
+const canonicalURL = canonical || new URL(Astro.url.pathname, Astro.site || 'https://mumutech.netlify.app').href;
+---
+
+<!-- Global Metadata -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="canonical" href={canonicalURL} />
+<meta name="generator" content={Astro.generator} />
+
+<!-- Primary Meta Tags -->
+<title>{title}</title>
+<meta name="title" content={title} />
+<meta name="description" content={description} />
+<meta name="author" content={author} />
+<meta name="robots" content="index, follow" />
+<meta name="theme-color" content="#0d0d11" />
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content={type} />
+<meta property="og:url" content={canonicalURL} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={image} />
+<meta property="og:site_name" content={DEFAULT_SITE_METADATA.siteName} />
+<meta property="og:locale" content={DEFAULT_SITE_METADATA.locale} />
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:url" content={canonicalURL} />
+<meta property="twitter:title" content={title} />
+<meta property="twitter:description" content={description} />
+<meta property="twitter:image" content={image} />
+<meta property="twitter:creator" content={DEFAULT_SITE_METADATA.twitterHandle} />
+
+<!-- Structured Data (JSON-LD) -->
+<script type="application/ld+json" set:html={JSON.stringify(structuredData)} />

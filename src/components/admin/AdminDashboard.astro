@@ -1,0 +1,338 @@
+---
+import styles from './AdminDashboard.module.css';
+import Button from '../Button.astro';
+import Badge from '../Badge.astro';
+import { contentRepository } from '../../repositories/content.repository';
+
+const allItems = await contentRepository.getAllItems();
+const workshops = allItems.filter((i) => i.category === 'educativa');
+const services = allItems.filter((i) => i.category === 'servicios');
+const projects = allItems.filter((i) => i.category === 'cosas-interesantes');
+const messages = await contentRepository.getContactMessages();
+---
+
+<div class={styles.dashboard}>
+  <div class={styles.topBar}>
+    <div class={styles.userInfo}>
+      <span style="color: #39ff14;">●</span>
+      <span>SESIÓN ACTIVA: <strong id="user-display-email">admin@mumutech.com</strong></span>
+    </div>
+
+    <div style="display: flex; gap: 0.75rem;">
+      <Button href="/" variant="secondary" size="sm">
+        VER SITIO WEB
+      </Button>
+      <button id="admin-logout-btn" class={styles.actionBtn} style="padding: 0.5rem 1rem; border-color: #ff2a85; color: #ff94c2;">
+        CERRAR SESIÓN
+      </button>
+    </div>
+  </div>
+
+  <div class={styles.tabs} role="tablist">
+    <button class:list={[styles.tabBtn, styles.active]} data-tab="workshops" role="tab">
+      TALLERES ({workshops.length})
+    </button>
+    <button class={styles.tabBtn} data-tab="services" role="tab">
+      SERVICIOS ({services.length})
+    </button>
+    <button class={styles.tabBtn} data-tab="projects" role="tab">
+      PROYECTOS DIY ({projects.length})
+    </button>
+    <button class={styles.tabBtn} data-tab="messages" role="tab">
+      MENSAJES ({messages.length})
+    </button>
+    <button class={styles.tabBtn} data-tab="create" role="tab" style="color: #39ff14;">
+      + NUEVO CONTENIDO
+    </button>
+  </div>
+
+  <!-- Workshops Panel -->
+  <section id="panel-workshops" class:list={[styles.panel, styles.active]} role="tabpanel">
+    <h2 style="color: #ffffff; font-size: 1.25rem; font-family: var(--font-mono);">GESTIÓN DE TALLERES EDUCATIVOS</h2>
+    <div style="overflow-x: auto;">
+      <table class={styles.table}>
+        <thead>
+          <tr>
+            <th>CÓD</th>
+            <th>TÍTULO</th>
+            <th>NIVEL</th>
+            <th>PRECIO</th>
+            <th>ACCIONES</th>
+          </tr>
+        </thead>
+        <tbody>
+          {workshops.map((w) => (
+            <tr>
+              <td><Badge variant="pink">{w.code}</Badge></td>
+              <td>{w.title}</td>
+              <td>{w.level || 'N/A'}</td>
+              <td>${w.price?.toLocaleString('es-CL')} CLP</td>
+              <td>
+                <button class:list={[styles.actionBtn, styles.deleteBtn]} data-delete-id={w.id}>
+                  ELIMINAR
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Services Panel -->
+  <section id="panel-services" class={styles.panel} role="tabpanel">
+    <h2 style="color: #ffffff; font-size: 1.25rem; font-family: var(--font-mono);">GESTIÓN DE SERVICIOS & REPARACIONES</h2>
+    <div style="overflow-x: auto;">
+      <table class={styles.table}>
+        <thead>
+          <tr>
+            <th>CÓD</th>
+            <th>TÍTULO</th>
+            <th>TIPO</th>
+            <th>DESDE</th>
+            <th>ACCIONES</th>
+          </tr>
+        </thead>
+        <tbody>
+          {services.map((s) => (
+            <tr>
+              <td><Badge variant="cyan">{s.code}</Badge></td>
+              <td>{s.title}</td>
+              <td>{s.serviceType || 'Servicio'}</td>
+              <td>${s.startingPrice?.toLocaleString('es-CL')} CLP</td>
+              <td>
+                <button class:list={[styles.actionBtn, styles.deleteBtn]} data-delete-id={s.id}>
+                  ELIMINAR
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Projects Panel -->
+  <section id="panel-projects" class={styles.panel} role="tabpanel">
+    <h2 style="color: #ffffff; font-size: 1.25rem; font-family: var(--font-mono);">GESTIÓN DE COSAS INTERESANTES & DIY</h2>
+    <div style="overflow-x: auto;">
+      <table class={styles.table}>
+        <thead>
+          <tr>
+            <th>CÓD</th>
+            <th>TÍTULO</th>
+            <th>CATEGORÍA</th>
+            <th>ACCIONES</th>
+          </tr>
+        </thead>
+        <tbody>
+          {projects.map((p) => (
+            <tr>
+              <td><Badge variant="lime">{p.code}</Badge></td>
+              <td>{p.title}</td>
+              <td>{p.projectType || 'DIY'}</td>
+              <td>
+                <button class:list={[styles.actionBtn, styles.deleteBtn]} data-delete-id={p.id}>
+                  ELIMINAR
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Messages Panel -->
+  <section id="panel-messages" class={styles.panel} role="tabpanel">
+    <h2 style="color: #ffffff; font-size: 1.25rem; font-family: var(--font-mono);">MENSAJES Y CONTACTOS RECIBIDOS</h2>
+    {messages.length === 0 ? (
+      <p style="margin-top: 1rem; color: #a0a0b5; font-family: var(--font-mono);">No hay mensajes nuevos registrados aún.</p>
+    ) : (
+      <div style="overflow-x: auto;">
+        <table class={styles.table}>
+          <thead>
+            <tr>
+              <th>FECHA</th>
+              <th>NOMBRE</th>
+              <th>EMAIL</th>
+              <th>INTERÉS</th>
+              <th>MENSAJE</th>
+            </tr>
+          </thead>
+          <tbody>
+            {messages.map((m) => (
+              <tr>
+                <td>{new Date(m.createdAt).toLocaleDateString('es-CL')}</td>
+                <td><strong>{m.name}</strong></td>
+                <td><a href={`mailto:${m.email}`} style="color: #00f0ff;">{m.email}</a></td>
+                <td><Badge>{m.interest}</Badge></td>
+                <td style="max-width: 300px;">{m.message}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )}
+  </section>
+
+  <!-- Create Content Panel -->
+  <section id="panel-create" class={styles.panel} role="tabpanel">
+    <h2 style="color: #ffffff; font-size: 1.25rem; font-family: var(--font-mono); margin-bottom: 1.5rem;">
+      PUBLICAR NUEVO ITEM (SUPABASE & CLOUDINARY READY)
+    </h2>
+
+    <form id="create-content-form" style="display: flex; flex-direction: column; gap: 1rem;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div>
+          <label style="font-family: var(--font-mono); font-size: 0.8rem; color: #a0a0b5;">CÓDIGO (3 DÍGITOS)</label>
+          <input type="text" name="code" required pattern="[0-9]{3}" placeholder="010" style="width: 100%; padding: 0.6rem; background: #08080c; border: 1px solid #333; color: #fff; font-family: monospace;" />
+        </div>
+        <div>
+          <label style="font-family: var(--font-mono); font-size: 0.8rem; color: #a0a0b5;">SECCIÓN / CATEGORÍA</label>
+          <select name="category" style="width: 100%; padding: 0.6rem; background: #08080c; border: 1px solid #333; color: #fff;">
+            <option value="educativa">Educativa (Taller)</option>
+            <option value="servicios">Servicios (Reparación/Mod)</option>
+            <option value="cosas-interesantes">Cosas Interesantes (DIY)</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label style="font-family: var(--font-mono); font-size: 0.8rem; color: #a0a0b5;">TÍTULO</label>
+        <input type="text" name="title" required placeholder="Ej: PEDAL DELAY PT2399 DIY" style="width: 100%; padding: 0.6rem; background: #08080c; border: 1px solid #333; color: #fff;" />
+      </div>
+
+      <div>
+        <label style="font-family: var(--font-mono); font-size: 0.8rem; color: #a0a0b5;">RESUMEN CORTO</label>
+        <input type="text" name="summary" required placeholder="Descripción concisa para la tarjeta..." style="width: 100%; padding: 0.6rem; background: #08080c; border: 1px solid #333; color: #fff;" />
+      </div>
+
+      <div>
+        <label style="font-family: var(--font-mono); font-size: 0.8rem; color: #a0a0b5;">DESCRIPCIÓN COMPLETA</label>
+        <textarea name="description" required rows="3" placeholder="Detalles técnicos, materiales, circuito..." style="width: 100%; padding: 0.6rem; background: #08080c; border: 1px solid #333; color: #fff;"></textarea>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div>
+          <label style="font-family: var(--font-mono); font-size: 0.8rem; color: #a0a0b5;">URL DE IMAGEN (O CLOUDINARY ID)</label>
+          <input type="url" name="imageUrl" required value="https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=1000&q=80" style="width: 100%; padding: 0.6rem; background: #08080c; border: 1px solid #333; color: #fff;" />
+        </div>
+        <div>
+          <label style="font-family: var(--font-mono); font-size: 0.8rem; color: #a0a0b5;">TEXTO ALT IMAGEN</label>
+          <input type="text" name="imageAlt" required value="Foto de circuito pedal diy" style="width: 100%; padding: 0.6rem; background: #08080c; border: 1px solid #333; color: #fff;" />
+        </div>
+      </div>
+
+      <div>
+        <label style="font-family: var(--font-mono); font-size: 0.8rem; color: #a0a0b5;">TAGS (SEPARADOS POR COMA)</label>
+        <input type="text" name="tags" placeholder="Pedales DIY, Delay, PT2399, Audio" style="width: 100%; padding: 0.6rem; background: #08080c; border: 1px solid #333; color: #fff;" />
+      </div>
+
+      <Button type="submit" variant="primary" size="md">
+        GUARDAR Y PUBLICAR EN MUMU TECH
+      </Button>
+    </form>
+  </section>
+</div>
+
+<script>
+  // Tab switching logic
+  const tabs = document.querySelectorAll('[data-tab]');
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const target = tab.getAttribute('data-tab');
+      tabs.forEach((t) => t.classList.remove(styles.active || 'active'));
+      tab.classList.add(styles.active || 'active');
+
+      document.querySelectorAll('[role="tabpanel"]').forEach((p) => {
+        p.classList.remove(styles.active || 'active');
+      });
+
+      const panel = document.getElementById(`panel-${target}`);
+      if (panel) {
+        panel.classList.add(styles.active || 'active');
+      }
+    });
+  });
+
+  // Logout handler
+  const logoutBtn = document.getElementById('admin-logout-btn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('mumu_admin_token');
+      localStorage.removeItem('mumu_admin_user');
+      window.location.reload();
+    });
+  }
+
+  // Delete handler
+  document.querySelectorAll('[data-delete-id]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const id = btn.getAttribute('data-delete-id');
+      if (id && confirm('¿Estás seguro de eliminar este elemento?')) {
+        const token = localStorage.getItem('mumu_admin_token') || '';
+        const res = await fetch(`/api/content?id=${id}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          alert('Elemento eliminado exitosamente');
+          window.location.reload();
+        }
+      }
+    });
+  });
+
+  // Create form handler
+  const createForm = document.getElementById('create-content-form') as HTMLFormElement | null;
+  if (createForm) {
+    createForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(createForm);
+      const token = localStorage.getItem('mumu_admin_token') || '';
+
+      const tagsRaw = (formData.get('tags') as string) || '';
+      const tags = tagsRaw.split(',').map((t) => t.trim()).filter(Boolean);
+
+      const title = formData.get('title') as string;
+      const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+      const payload = {
+        id: `item-${Date.now()}`,
+        code: formData.get('code'),
+        title: title,
+        slug: slug || `item-${Date.now()}`,
+        summary: formData.get('summary'),
+        description: formData.get('description'),
+        category: formData.get('category'),
+        imageUrl: formData.get('imageUrl'),
+        imageAlt: formData.get('imageAlt'),
+        tags: tags,
+        featured: true,
+        published: true,
+      };
+
+      try {
+        const res = await fetch('/api/content', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        });
+
+        const result = await res.json();
+        if (res.ok && result.success) {
+          alert('¡Elemento creado y publicado con éxito!');
+          window.location.reload();
+        } else {
+          alert('Error al guardar: ' + (result.error || 'Datos inválidos'));
+        }
+      } catch {
+        alert('Error al conectar con la API');
+      }
+    });
+  }
+</script>

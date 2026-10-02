@@ -1,0 +1,97 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  background: rgba(18, 18, 24, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  padding: 2rem;
+  border-radius: 2px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #c8c8dc;
+  letter-spacing: 0.05em;
+}
+
+.input, .select, .textarea {
+  background: rgba(8, 8, 12, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  padding: 0.75rem 1rem;
+  border-radius: 2px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input:focus, .select:focus, .textarea:focus {
+  border-color: #00f0ff;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+}
+
+/* Modern web guidance :user-invalid and :user-valid */
+.input:user-invalid, .textarea:user-invalid, .select:user-invalid {
+  border-color: #ff2a85;
+  box-shadow: 0 0 8px rgba(255, 42, 133, 0.4);
+}
+
+.input:user-valid:not(:placeholder-shown), .textarea:user-valid:not(:placeholder-shown) {
+  border-color: #39ff14;
+}
+
+.textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.checkboxContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  font-size: 0.88rem;
+  color: #d6d6e6;
+}
+
+.checkbox {
+  width: 1.15rem;
+  height: 1.15rem;
+  accent-color: #00f0ff;
+  cursor: pointer;
+}
+
+.statusMessage {
+  padding: 1rem;
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: none;
+}
+
+.statusSuccess {
+  display: block;
+  background: rgba(57, 255, 20, 0.15);
+  border: 1px solid #39ff14;
+  color: #8aff75;
+}
+
+.statusError {
+  display: block;
+  background: rgba(255, 42, 133, 0.15);
+  border: 1px solid #ff2a85;
+  color: #ff94c2;
+}
