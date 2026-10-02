@@ -1,7 +1,8 @@
 {
-  "name": "",
+  "name": "mumu-tech",
   "type": "module",
-  "version": "0.0.1",
+  "version": "1.0.0",
+  "description": "Mumu Tech - Talleres de electrónica DIY, pedales de guitarra, reparaciones y proyectos creativos.",
   "engines": {
     "node": ">=22.12.0"
   },
@@ -9,7 +10,10 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@astrojs/netlify": "^8.2.6",
@@ -18,11 +22,11 @@
     "astro": "^7.3.5",
     "zod": "^4.6.5"
   },
-  "allowScripts": {
-    "esbuild": true
-  },
   "devDependencies": {
     "@vitest/coverage-v8": "^5.0.3",
     "vitest": "^5.0.3"
+  },
+  "allowScripts": {
+    "esbuild": true
   }
 }
