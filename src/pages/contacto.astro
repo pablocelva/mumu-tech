@@ -1,9 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import SectionHeader from '../components/SectionHeader.astro';
-import ClipboardButton from '../components/ClipboardButton.astro';
+import ContactChannels from '../components/ContactChannels.astro';
+import NewsletterForm from '../components/NewsletterForm.astro';
 import ContactForm from '../components/ContactForm.astro';
-import Button from '../components/Button.astro';
 
 const searchParams = Astro.url.searchParams;
 const interestParam = searchParams.get('interest') || 'taller';
@@ -11,85 +11,36 @@ const interestParam = searchParams.get('interest') || 'taller';
 
 <Layout
   title="Contacto & Conectividad | Mumu Tech"
-  description="Contáctanos vía WhatsApp directo, correo con portapapeles, Instagram o formulario para talleres, reparaciones y proyectos DIY."
+  description="Contáctanos vía WhatsApp directo, correo con portapapeles, Instagram, suscríbete al newsletter o envíanos un formulario para talleres y reparaciones."
 >
   <div class="container" style="max-width: 1100px; margin: 0 auto; padding: 0 1.5rem 4rem 1.5rem;">
     
     <SectionHeader
       title="HABLEMOS Y HAGAMOS COSAS"
       descriptions={[
-        "¿Tienes una idea para un pedal personalizado, necesitas reparar tu equipo o quieres reservar tu cupo para los próximos talleres de electrónica? Elige tu canal favorito o déjame un mensaje directo a continuación.",
-        "También puedes unirte a nuestro mailing list para enterarte antes de que se abran nuevas fechas y lanzamientos de kits."
+        "¿Tienes una idea para un pedal personalizado, necesitas reparar tu equipo o quieres reservar tu cupo para los próximos talleres de electrónica? Elige tu canal favorito, suscríbete a nuestras novedades o déjame un mensaje directo a continuación.",
       ]}
     />
 
-    <!-- Quick Direct Action Grid -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
-      
-      <!-- WhatsApp Direct Card -->
-      <div style="background: rgba(18, 18, 24, 0.82); border: 1px solid rgba(57, 255, 20, 0.4); padding: 1.5rem; border-radius: 2px; display: flex; flex-direction: column; justify-content: space-between; gap: 1rem;">
-        <div>
-          <span style="font-family: var(--font-mono); font-size: 0.8rem; color: #39ff14; font-weight: 700;">[ CANAL RÁPIDO ]</span>
-          <h3 style="color: #ffffff; font-size: 1.2rem; margin: 0.4rem 0;">WHATSAPP DIRECTO</h3>
-          <p style="color: #c4c4d4; font-size: 0.9rem; line-height: 1.5;">
-            Ideal para consultas urgentes sobre el estado de tu equipo, dudas rápidas de talleres o fotos de fallas.
-          </p>
-        </div>
-        <Button
-          href="https://wa.me/56900000000?text=Hola%20Mumu%20Tech!%20Te%20escribo%20desde%20la%20web%20para%20consultar%20por:"
-          target="_blank"
-          rel="noopener noreferrer"
-          variant="primary"
-          size="md"
-        >
-          ABRIR WHATSAPP ↗
-        </Button>
-      </div>
+    <!-- Unified Direct Contact & Social Channels Component -->
+    <ContactChannels />
 
-      <!-- Email Card with Clipboard Button -->
-      <div style="background: rgba(18, 18, 24, 0.82); border: 1px solid rgba(0, 240, 255, 0.4); padding: 1.5rem; border-radius: 2px; display: flex; flex-direction: column; justify-content: space-between; gap: 1rem;">
-        <div>
-          <span style="font-family: var(--font-mono); font-size: 0.8rem; color: #00f0ff; font-weight: 700;">[ CORREO OFICIAL ]</span>
-          <h3 style="color: #ffffff; font-size: 1.2rem; margin: 0.4rem 0;">EMAIL DIRECTO</h3>
-          <p style="color: #c4c4d4; font-size: 0.9rem; line-height: 1.5;">
-            Para cotizaciones formales, envío de esquemáticos o consultas extensas de proyectos.
-          </p>
-        </div>
-        <ClipboardButton textToCopy="contacto@mumutech.com" label="COPIAR CORREO" />
-      </div>
-
-      <!-- Instagram Card -->
-      <div style="background: rgba(18, 18, 24, 0.82); border: 1px solid rgba(255, 42, 133, 0.4); padding: 1.5rem; border-radius: 2px; display: flex; flex-direction: column; justify-content: space-between; gap: 1rem;">
-        <div>
-          <span style="font-family: var(--font-mono); font-size: 0.8rem; color: #ff2a85; font-weight: 700;">[ COMUNIDAD ]</span>
-          <h3 style="color: #ffffff; font-size: 1.2rem; margin: 0.4rem 0;">INSTAGRAM</h3>
-          <p style="color: #c4c4d4; font-size: 0.9rem; line-height: 1.5;">
-            Fotos del banco de trabajo en tiempo real, videos de pruebas sonoras y anuncios de talleres.
-          </p>
-        </div>
-        <Button
-          href="https://instagram.com/mumutech"
-          target="_blank"
-          rel="noopener noreferrer"
-          variant="secondary"
-          size="md"
-        >
-          SEGUIR @MUMUTECH ↗
-        </Button>
-      </div>
-
+    <!-- 1. Dedicated Fast Newsletter Section -->
+    <div style="max-width: 750px; margin: 0 auto;">
+      <NewsletterForm />
     </div>
 
     <hr class="retroDivider" style="width: 100%; height: 1px; background: rgba(255, 255, 255, 0.2); border: none; margin: 3rem 0;" />
 
-    <!-- Form Section -->
+    <!-- 2. Full Contact / Inquiry Form Section -->
     <div style="max-width: 750px; margin: 0 auto;">
       <div style="text-align: center; margin-bottom: 2rem;">
-        <h2 style="font-family: system-ui, sans-serif; font-size: 1.5rem; font-weight: 800; color: #ffffff; text-transform: uppercase;">
-          FORMULARIO DE CONTACTO & MAILING LIST
+        <span style="font-family: var(--font-mono); font-size: 0.8rem; color: #00f0ff; font-weight: 700;">[ CONSULTAS TÉCNICAS & COTIZACIÓN ]</span>
+        <h2 style="font-family: system-ui, sans-serif; font-size: 1.5rem; font-weight: 800; color: #ffffff; text-transform: uppercase; margin-top: 0.4rem;">
+          FORMULARIO DE CONTACTO & MENSAJE DIRECTO
         </h2>
         <p style="color: #a6a6b8; font-size: 0.92rem; margin-top: 0.3rem;">
-          Escribe tus datos y te responderemos por correo o WhatsApp en menos de 24 horas.
+          ¿Buscas reparar un equipo o reservar cupo? Escribe tus datos y te responderemos en menos de 24 horas.
         </p>
       </div>
 

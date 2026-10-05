@@ -6,6 +6,7 @@ export interface SeoMetadataProps {
   type?: 'website' | 'article' | 'profile';
   author?: string;
   publishedTime?: string;
+  robots?: string;
 }
 
 export const DEFAULT_SITE_METADATA = {
@@ -47,7 +48,6 @@ export function generateLocalBusinessSchema() {
     sameAs: [
       'https://instagram.com/mumutech',
       'https://wa.me/56900000000',
-      'https://github.com/mumutech',
     ],
   };
 }

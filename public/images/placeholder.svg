@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <defs>
+    <!-- Background Grid Pattern -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(0, 240, 255, 0.08)" stroke-width="1"/>
+    </pattern>
+    <!-- CRT Scanlines Pattern -->
+    <pattern id="scanlines" width="100" height="4" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="0" x2="100" y2="0" stroke="rgba(0,0,0,0.3)" stroke-width="1.5" />
+    </pattern>
+    <!-- Neon Glow Filter -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="grad-logo" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff2a85" />
+      <stop offset="100%" stop-color="#00f0ff" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background Base -->
+  <rect width="800" height="500" fill="#0d0d15"/>
+  <rect width="800" height="500" fill="url(#grid)"/>
+
+  <!-- Border Frame -->
+  <rect x="20" y="20" width="760" height="460" fill="none" stroke="rgba(0, 240, 255, 0.25)" stroke-width="1" stroke-dasharray="8 4"/>
+  
+  <!-- Corner Tech Accents -->
+  <path d="M 20 50 L 20 20 L 50 20" fill="none" stroke="#00f0ff" stroke-width="3"/>
+  <path d="M 750 20 L 780 20 L 780 50" fill="none" stroke="#00f0ff" stroke-width="3"/>
+  <path d="M 20 450 L 20 480 L 50 480" fill="none" stroke="#ff2a85" stroke-width="3"/>
+  <path d="M 750 480 L 780 480 L 780 450" fill="none" stroke="#ff2a85" stroke-width="3"/>
+
+  <!-- Oscilloscope Wave Graphic -->
+  <g transform="translate(400, 210)">
+    <!-- Scope Ring -->
+    <circle cx="0" cy="0" r="75" fill="#141420" stroke="rgba(57, 255, 20, 0.4)" stroke-width="2"/>
+    <circle cx="0" cy="0" r="60" fill="none" stroke="rgba(57, 255, 20, 0.15)" stroke-width="1" stroke-dasharray="3 3"/>
+    
+    <!-- Crosshairs -->
+    <line x1="-70" y1="0" x2="70" y2="0" stroke="rgba(57, 255, 20, 0.25)" stroke-width="1"/>
+    <line x1="0" y1="-70" x2="0" y2="70" stroke="rgba(57, 255, 20, 0.25)" stroke-width="1"/>
+    
+    <!-- Analog Synth Sine / Distortion Wave -->
+    <path d="M -55 0 Q -40 -35 -25 0 T 5 0 T 35 0 T 55 0" fill="none" stroke="#39ff14" stroke-width="3" stroke-linecap="round" filter="url(#glow)"/>
+    
+    <!-- Pulse Points -->
+    <circle cx="-25" cy="0" r="3" fill="#39ff14"/>
+    <circle cx="5" cy="0" r="3" fill="#39ff14"/>
+    <circle cx="35" cy="0" r="3" fill="#39ff14"/>
+  </g>
+
+  <!-- Typography Labels -->
+  <text x="400" y="325" text-anchor="middle" font-family="'Courier New', Courier, monospace" font-size="22" font-weight="900" letter-spacing="4" fill="url(#grad-logo)">
+    MUMU TECH
+  </text>
+  
+  <text x="400" y="355" text-anchor="middle" font-family="'Courier New', Courier, monospace" font-size="12" font-weight="700" letter-spacing="3" fill="#00f0ff">
+    [ HARDWARE LAB &amp; EXPERIMENTS ]
+  </text>
+
+  <text x="400" y="390" text-anchor="middle" font-family="'Courier New', Courier, monospace" font-size="11" font-weight="600" letter-spacing="2" fill="#787890">
+    IMAGEN EN PROCESO DE CARGA O MUESTRA
+  </text>
+
+  <!-- Scanlines Overlay -->
+  <rect width="800" height="500" fill="url(#scanlines)" opacity="0.4" pointer-events="none"/>
+</svg>

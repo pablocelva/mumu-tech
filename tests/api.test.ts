@@ -32,6 +32,25 @@ describe('API Route Handlers Integration Tests', () => {
       expect(json.data.name).toBe('David Gilmour');
     });
 
+    it('should successfully process a direct newsletter subscription with email only', async () => {
+      const request = new Request('http://localhost/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: 'synthlover@analog.com',
+        }),
+      });
+
+      // @ts-ignore
+      const response = await contactHandler({ request } as any);
+      const json = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(json.success).toBe(true);
+      expect(json.data.email).toBe('synthlover@analog.com');
+      expect(json.data.interest).toBe('newsletter');
+    });
+
     it('should reject invalid payload with status 400', async () => {
       const request = new Request('http://localhost/api/contact', {
         method: 'POST',

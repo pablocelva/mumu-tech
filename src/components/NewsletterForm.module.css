@@ -1,0 +1,128 @@
+.card {
+  background: rgba(18, 18, 26, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 240, 255, 0.4);
+  border-radius: 2px;
+  padding: 2rem;
+  margin-bottom: 2.5rem;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 240, 255, 0.1);
+}
+
+.header {
+  margin-bottom: 1.25rem;
+}
+
+.badge {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #00f0ff;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: inline-block;
+  margin-bottom: 0.5rem;
+}
+
+.title {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #ffffff;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+}
+
+.description {
+  color: #c8c8dc;
+  font-size: 0.94rem;
+  line-height: 1.6;
+}
+
+.form {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.inputWrapper {
+  flex: 1;
+  min-width: 260px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.icon {
+  position: absolute;
+  left: 1rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  fill: #888899;
+  pointer-events: none;
+}
+
+.input {
+  width: 100%;
+  background: rgba(8, 8, 12, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  padding: 0.75rem 1rem 0.75rem 2.8rem;
+  border-radius: 2px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.input:focus {
+  border-color: #00f0ff;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.35);
+}
+
+.input:user-invalid {
+  border-color: #ff2a85;
+  box-shadow: 0 0 8px rgba(255, 42, 133, 0.4);
+}
+
+.input:user-valid:not(:placeholder-shown) {
+  border-color: #39ff14;
+}
+
+.statusMessage {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  font-weight: 600;
+  display: none;
+}
+
+.statusSuccess {
+  display: block;
+  background: rgba(57, 255, 20, 0.15);
+  border: 1px solid #39ff14;
+  color: #8aff75;
+}
+
+.statusError {
+  display: block;
+  background: rgba(255, 42, 133, 0.15);
+  border: 1px solid #ff2a85;
+  color: #ff94c2;
+}
+
+@media (max-width: 640px) {
+  .card {
+    padding: 1.5rem;
+  }
+  
+  .form {
+    flex-direction: column;
+  }
+  
+  .inputWrapper {
+    min-width: 100%;
+  }
+}

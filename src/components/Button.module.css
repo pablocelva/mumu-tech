@@ -7,6 +7,7 @@
   font-family: system-ui, -apple-system, sans-serif;
   font-size: 0.88rem;
   font-weight: 700;
+  line-height: 1.25;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   border-radius: 2px;
@@ -15,6 +16,8 @@
   text-align: center;
   border: 1px solid transparent;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
+  text-decoration: none;
 }
 
 .primary {

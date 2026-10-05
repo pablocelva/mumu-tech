@@ -37,8 +37,7 @@ const getCategoryVariant = (cat: string) => {
         ))}
       </div>
 
-      <h2 class={styles.codeTitle}>
-        <span class={styles.codePrefix}>{item.code} —</span>
+      <h2 class={styles.cardTitle}>
         {item.title}
       </h2>
 
@@ -74,6 +73,7 @@ const getCategoryVariant = (cat: string) => {
       class={styles.image}
       width="800"
       height="500"
+      onerror="this.onerror=null; this.src='/images/placeholder.svg';"
     />
   </div>
 </article>

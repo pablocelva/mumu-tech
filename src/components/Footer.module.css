@@ -38,8 +38,13 @@
   background: linear-gradient(135deg, #a3f7bf 0%, #b8c0ff 50%, #f7b2bd 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text;
   display: inline-block;
   transform: skewX(-6deg);
+  padding-right: 0.35em;
+  padding-left: 0.05em;
+  padding-block: 0.1em;
+  line-height: 1.2;
 }
 
 .tagline {

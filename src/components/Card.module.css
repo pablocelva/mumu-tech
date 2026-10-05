@@ -37,7 +37,7 @@
   justify-content: space-between;
 }
 
-.codeTitle {
+.cardTitle {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 1.25rem;
   font-weight: 800;
@@ -46,11 +46,6 @@
   color: #ffffff;
   margin-bottom: 1rem;
   line-height: 1.3;
-}
-
-.codePrefix {
-  color: #00f0ff;
-  margin-right: 0.4rem;
 }
 
 .description {

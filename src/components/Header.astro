@@ -22,13 +22,14 @@ const isActive = (href: string) => {
 ---
 
 <header class={styles.header}>
-  <div class="container" style="max-width: 1100px; margin: 0 auto; padding: 0 1.5rem;">
+  <div class="container" style="max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; position: relative;">
     <div class={styles.inner}>
       <a href="/" class={styles.logo} aria-label="Mumu Tech Inicio">
         MUMU TECH
       </a>
 
-      <nav class={styles.nav} aria-label="Navegación principal">
+      <!-- Desktop Navigation (visible on screens > 880px) -->
+      <nav class={styles.desktopNav} aria-label="Navegación principal desktop">
         {navItems.map((item) => (
           <a
             href={item.href}
@@ -38,10 +39,92 @@ const isActive = (href: string) => {
             {item.label}
           </a>
         ))}
-        <a href="/admin" class={styles.adminBadge} aria-label="Panel Admin">
-          ADMIN
-        </a>
+      </nav>
+
+      <!-- Mobile & Tablet Hamburger Toggle Button -->
+      <button
+        type="button"
+        id="menu-toggle-btn"
+        class={styles.menuToggle}
+        aria-label="Abrir menú de navegación"
+        aria-expanded="false"
+        aria-controls="mobile-nav-menu"
+      >
+        <span class={styles.hamburgerBar}></span>
+        <span class={styles.hamburgerBar}></span>
+        <span class={styles.hamburgerBar}></span>
+      </button>
+
+      <!-- Mobile & Tablet Navigation Drawer (visible on toggle below 880px) -->
+      <nav
+        id="mobile-nav-menu"
+        class={styles.mobileMenu}
+        aria-label="Navegación móvil y tablet"
+      >
+        {navItems.map((item) => (
+          <a
+            href={item.href}
+            class:list={[styles.mobileNavLink, { [styles.active]: isActive(item.href) }]}
+            aria-current={isActive(item.href) ? 'page' : undefined}
+          >
+            {item.label}
+          </a>
+        ))}
       </nav>
     </div>
   </div>
 </header>
+
+<script>
+  function setupMobileMenu() {
+    const toggleBtn = document.getElementById('menu-toggle-btn');
+    const mobileMenu = document.getElementById('mobile-nav-menu');
+
+    if (!toggleBtn || !mobileMenu) return;
+
+    const toggleMenu = (open?: boolean) => {
+      const isCurrentlyOpen = toggleBtn.getAttribute('aria-expanded') === 'true';
+      const shouldOpen = typeof open === 'boolean' ? open : !isCurrentlyOpen;
+
+      toggleBtn.setAttribute('aria-expanded', String(shouldOpen));
+      toggleBtn.setAttribute('aria-label', shouldOpen ? 'Cerrar menú' : 'Abrir menú');
+      
+      if (shouldOpen) {
+        toggleBtn.classList.add('isOpen');
+        mobileMenu.classList.add('isOpen');
+      } else {
+        toggleBtn.classList.remove('isOpen');
+        mobileMenu.classList.remove('isOpen');
+      }
+    };
+
+    toggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleMenu();
+    });
+
+    // Close when clicking any nav link
+    mobileMenu.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', () => {
+        toggleMenu(false);
+      });
+    });
+
+    // Close when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!mobileMenu.contains(e.target as Node) && !toggleBtn.contains(e.target as Node)) {
+        toggleMenu(false);
+      }
+    });
+
+    // Close with Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        toggleMenu(false);
+      }
+    });
+  }
+
+  setupMobileMenu();
+  document.addEventListener('astro:after-swap', setupMobileMenu);
+</script>

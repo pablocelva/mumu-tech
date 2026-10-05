@@ -1,0 +1,97 @@
+---
+import styles from './NewsletterForm.module.css';
+import Button from './Button.astro';
+---
+
+<div class={styles.card}>
+  <div class={styles.header}>
+    <span class={styles.badge}>[ MAILING LIST & NOVEDADES ]</span>
+    <h2 class={styles.title}>SUSCRÍBETE A NOVEDADES Y TALLERES</h2>
+    <p class={styles.description}>
+      Recibe avisos antes de que se abran nuevas fechas de talleres presenciales, lanzamientos de kits DIY y guías de electrónica analógica. Sin spam, solo contenido del taller.
+    </p>
+  </div>
+
+  <form id="newsletter-form" class={styles.form} novalidate>
+    <div class={styles.inputWrapper}>
+      <svg class={styles.icon} viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+      </svg>
+      <input
+        type="email"
+        id="newsletter-email"
+        name="email"
+        required
+        placeholder="tu-correo@ejemplo.com"
+        class={styles.input}
+        autocomplete="email"
+        aria-label="Correo electrónico para suscripción al newsletter"
+      />
+    </div>
+
+    <Button type="submit" variant="accentPink" size="md" id="newsletter-submit-btn">
+      SUSCRIBIRME
+    </Button>
+  </form>
+
+  <div id="newsletter-status" class={styles.statusMessage} role="alert" aria-live="polite"></div>
+</div>
+
+<script>
+  function setupNewsletterForm() {
+    const form = document.getElementById('newsletter-form') as HTMLFormElement | null;
+    const statusDiv = document.getElementById('newsletter-status');
+    const submitBtn = document.getElementById('newsletter-submit-btn');
+
+    if (!form || !statusDiv || !submitBtn) return;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      submitBtn.setAttribute('disabled', 'true');
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = 'PROCESANDO...';
+      statusDiv.className = styles.statusMessage;
+      statusDiv.style.display = 'none';
+
+      const formData = new FormData(form);
+      const email = formData.get('email');
+
+      try {
+        const res = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+
+        const result = await res.json();
+
+        if (res.ok && result.success) {
+          statusDiv.className = `${styles.statusMessage} ${styles.statusSuccess}`;
+          statusDiv.style.display = 'block';
+          statusDiv.textContent = '✓ ' + (result.message || '¡Te has suscrito con éxito al mailing list!');
+          form.reset();
+        } else {
+          statusDiv.className = `${styles.statusMessage} ${styles.statusError}`;
+          statusDiv.style.display = 'block';
+          statusDiv.textContent = '⚠ ' + (result.error || 'Ingresa un correo válido.');
+        }
+      } catch {
+        statusDiv.className = `${styles.statusMessage} ${styles.statusError}`;
+        statusDiv.style.display = 'block';
+        statusDiv.textContent = '⚠ Error de conexión. Intenta nuevamente.';
+      } finally {
+        submitBtn.removeAttribute('disabled');
+        submitBtn.textContent = originalText || 'SUSCRIBIRME';
+      }
+    });
+  }
+
+  setupNewsletterForm();
+  document.addEventListener('astro:after-swap', setupNewsletterForm);
+</script>

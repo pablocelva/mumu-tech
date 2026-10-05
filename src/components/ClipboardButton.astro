@@ -1,34 +1,43 @@
 ---
 import styles from './ClipboardButton.module.css';
+import Button from './Button.astro';
 
 interface Props {
   textToCopy: string;
   label?: string;
   successMessage?: string;
+  fullWidth?: boolean;
+  size?: 'sm' | 'md' | 'lg';
+  variant?: 'primary' | 'secondary' | 'outline' | 'accentPink';
 }
 
 const {
   textToCopy,
   label = 'COPIAR CORREO',
   successMessage = '¡COPIADO AL PORTAPAPELES!',
+  fullWidth = false,
+  size = 'md',
+  variant = 'secondary',
 } = Astro.props;
 
 const buttonId = `clipboard-btn-${Math.random().toString(36).substring(2, 8)}`;
 ---
 
-<div class={styles.wrapper}>
-  <button
+<div class:list={[styles.wrapper, { [styles.wrapperFullWidth]: fullWidth }]}>
+  <Button
     type="button"
     id={buttonId}
-    class={styles.copyBtn}
+    variant={variant}
+    size={size}
+    fullWidth={fullWidth}
     data-copy={textToCopy}
     aria-label={`${label}: ${textToCopy}`}
   >
-    <svg class={styles.icon} viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M16 1H4C2.9 1 2 1.9 2 3v14h2V3h12V1zm3 4H8C6.9 5 6 5.9 6 7v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true" style="flex-shrink: 0; margin-right: 0.35rem;">
+      <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
     </svg>
-    <span>{label} ({textToCopy})</span>
-  </button>
+    <span>{label}</span>
+  </Button>
   <span id={`${buttonId}-tooltip`} class={styles.tooltip} role="status" aria-live="polite">
     {successMessage}
   </span>

@@ -11,6 +11,7 @@ interface Props {
   id?: string;
   target?: string;
   rel?: string;
+  [key: string]: any;
 }
 
 const {
@@ -23,6 +24,7 @@ const {
   id,
   target,
   rel,
+  ...rest
 } = Astro.props;
 
 const classNames = [
@@ -36,11 +38,11 @@ const classNames = [
 
 {
   href ? (
-    <a href={href} class={classNames} id={id} target={target} rel={rel}>
+    <a href={href} class={classNames} id={id} target={target} rel={rel} {...rest}>
       <slot />
     </a>
   ) : (
-    <button type={type} class={classNames} id={id}>
+    <button type={type} class={classNames} id={id} {...rest}>
       <slot />
     </button>
   )
