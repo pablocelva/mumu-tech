@@ -13,7 +13,7 @@ const interestParam = searchParams.get('interest') || 'taller';
   title="Contacto & Conectividad | Mumu Tech"
   description="Contáctanos vía WhatsApp directo, correo con portapapeles, Instagram, suscríbete al newsletter o envíanos un formulario para talleres y reparaciones."
 >
-  <div class="container" style="max-width: 1100px; margin: 0 auto; padding: 0 1.5rem 4rem 1.5rem;">
+  <div class="container" style="padding-bottom: 4rem;">
     
     <SectionHeader
       title="HABLEMOS Y HAGAMOS COSAS"
@@ -26,17 +26,17 @@ const interestParam = searchParams.get('interest') || 'taller';
     <ContactChannels />
 
     <!-- 1. Dedicated Fast Newsletter Section -->
-    <div style="max-width: 750px; margin: 0 auto;">
+    <div style="max-width: 750px; margin: 0 auto; width: 100%;">
       <NewsletterForm />
     </div>
 
-    <hr class="retroDivider" style="width: 100%; height: 1px; background: rgba(255, 255, 255, 0.2); border: none; margin: 3rem 0;" />
+    <hr class="retroDivider" />
 
     <!-- 2. Full Contact / Inquiry Form Section -->
-    <div style="max-width: 750px; margin: 0 auto;">
+    <div style="max-width: 750px; margin: 0 auto; width: 100%;">
       <div style="text-align: center; margin-bottom: 2rem;">
         <span style="font-family: var(--font-mono); font-size: 0.8rem; color: #00f0ff; font-weight: 700;">[ CONSULTAS TÉCNICAS & COTIZACIÓN ]</span>
-        <h2 style="font-family: system-ui, sans-serif; font-size: 1.5rem; font-weight: 800; color: #ffffff; text-transform: uppercase; margin-top: 0.4rem;">
+        <h2 style="font-family: system-ui, sans-serif; font-size: clamp(1.2rem, 4vw, 1.5rem); font-weight: 800; color: #ffffff; text-transform: uppercase; margin-top: 0.4rem; word-break: break-word;">
           FORMULARIO DE CONTACTO & MENSAJE DIRECTO
         </h2>
         <p style="color: #a6a6b8; font-size: 0.92rem; margin-top: 0.3rem;">
