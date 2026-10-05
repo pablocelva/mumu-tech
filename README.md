@@ -29,6 +29,7 @@
 - [Stack Tecnológico](#-stack-tecnológico)
 - [Panel de Administración (`/admin`)](#-panel-de-administración-admin)
 - [Integraciones (Supabase & Cloudinary)](#-integraciones-supabase--cloudinary)
+- [Estrategia de Email & Newsletter (`docs/`)](./docs/EMAIL_AND_NEWSLETTER_STRATEGY.md)
 - [SEO & Accesibilidad](#-seo--accesibilidad)
 - [Testing & Cobertura de Código](#-testing--cobertura-de-código)
 - [Scripts del Proyecto](#-scripts-del-proyecto)
@@ -77,16 +78,23 @@ El proyecto sigue una arquitectura en capas desacoplada y orientada al dominio:
 
 ```text
 mumu-tech/
+├── docs/                      # Documentación técnica extendida
+│   └── EMAIL_AND_NEWSLETTER_STRATEGY.md # Estrategia Resend, Brevo y Branding
+├── public/
+│   └── images/
+│       └── placeholder.svg    # Fallback gráfico retro para imágenes caídas
 ├── src/
 │   ├── components/            # Componentes UI semánticos y CSS Modules
 │   │   ├── admin/             # LoginForm & Dashboard administrativo
 │   │   ├── Badge.astro        # Etiquetas retro de categoría y estado
-│   │   ├── Button.astro       # Botones polimórficos (link/button)
-│   │   ├── Card.astro         # Tarjetas de catálogo numerado e imágenes
+│   │   ├── Button.astro       # Botones polimórficos accesibles (link/button)
+│   │   ├── Card.astro         # Tarjetas de catálogo e imágenes con fallback
 │   │   ├── ClipboardButton.astro # Copiado con feedback aria-live
+│   │   ├── ContactChannels.astro # Panel unificado de canales de atención (WhatsApp, Email, IG)
 │   │   ├── ContactForm.astro  # Formulario semántico accesible
 │   │   ├── Footer.astro       # Pie de página y enlaces
-│   │   ├── Header.astro       # Navbar con selector de ruta activa
+│   │   ├── Header.astro       # Navbar con menú hamburguesa responsivo (<=880px)
+│   │   ├── NewsletterForm.astro # Formulario rápido e independiente de mailing list
 │   │   ├── SectionHeader.astro # Título centrado y descripción lofi
 │   │   └── SEO.astro          # Open Graph, Twitter cards, JSON-LD Schema
 │   ├── layouts/
@@ -99,7 +107,7 @@ mumu-tech/
 │   │   └── supabase.ts        # Cliente Supabase con fallback local
 │   ├── pages/                 # Rutas Astro y Server Endpoints
 │   │   ├── api/               # Endpoints REST (/api/contact, /api/auth, /api/content)
-│   │   ├── admin/             # Gating del panel administrativo
+│   │   ├── admin/             # Gating del panel administrativo privado
 │   │   ├── cosas-interesantes.astro
 │   │   ├── contacto.astro
 │   │   ├── educativa.astro
@@ -129,7 +137,8 @@ mumu-tech/
 - **Single Responsibility (SRP)**: Separación clara entre validación (Zod), persistencia (Repositories), utilidades (Lib), presentación (Astro Components) y estilos (CSS Modules).
 - **Graceful Degradation / Offline First**: Funciona al 100% de manera inmediata sin necesidad obligatoria de configurar Supabase en el primer arranque, utilizando el almacenamiento en memoria y datos semilla curados.
 - **Type Safety Total**: Tipado estricto en TypeScript sin `any` arbitrarios, con inferencia directa desde los esquemas de Zod.
-- **HTML Semántico**: Uso riguroso de `<main>`, `<header>`, `<footer>`, `<nav>`, `<article>`, `<section>`, `<figure>` y roles ARIA (`aria-live`, `aria-current`, `role="status"`).
+- **HTML Semántico & Accesibilidad**: Uso riguroso de `<main>`, `<header>`, `<footer>`, `<nav>`, `<article>`, `<section>`, `<figure>` y roles ARIA (`aria-live`, `aria-current`, `role="status"`).
+- **Diseño Responsivo Sin Overflows**: Contenedores y tipografías fluidas (`clamp()`) con navegación colapsable en drawer para móvil/tablet y control estricto de desbordamiento horizontal.
 
 ---
 
