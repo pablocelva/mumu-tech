@@ -2,12 +2,12 @@ import type { APIRoute } from 'astro';
 import { ContentItemSchema } from '../../schemas';
 import { contentRepository } from '../../repositories/content.repository';
 import { authRepository } from '../../repositories/auth.repository';
+import { extractSessionToken } from '../../lib/security';
 
 export const prerender = false;
 
 async function checkAuth(request: Request): Promise<boolean> {
-  const authHeader = request.headers.get('Authorization') || '';
-  const token = authHeader.replace('Bearer ', '').trim();
+  const token = extractSessionToken(request);
   if (!token) return false;
   const user = await authRepository.verifyToken(token);
   return Boolean(user);
@@ -35,7 +35,7 @@ export const POST: APIRoute = async ({ request }) => {
   if (!isAuthed) {
     return new Response(JSON.stringify({ success: false, error: 'No autorizado' }), {
       status: 401,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
     });
   }
 
@@ -47,19 +47,19 @@ export const POST: APIRoute = async ({ request }) => {
       const errorMsg = validated.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join(', ');
       return new Response(JSON.stringify({ success: false, error: errorMsg }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
       });
     }
 
     const saved = await contentRepository.saveItem(validated.data);
     return new Response(JSON.stringify({ success: true, data: saved }), {
       status: 201,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
     });
   } catch {
     return new Response(JSON.stringify({ success: false, error: 'Error al procesar el contenido' }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
     });
   }
 };
@@ -69,7 +69,7 @@ export const DELETE: APIRoute = async ({ request, url }) => {
   if (!isAuthed) {
     return new Response(JSON.stringify({ success: false, error: 'No autorizado' }), {
       status: 401,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
     });
   }
 
@@ -77,13 +77,13 @@ export const DELETE: APIRoute = async ({ request, url }) => {
   if (!id) {
     return new Response(JSON.stringify({ success: false, error: 'ID requerido' }), {
       status: 400,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
     });
   }
 
   const deleted = await contentRepository.deleteItem(id);
   return new Response(JSON.stringify({ success: deleted }), {
     status: deleted ? 200 : 404,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
   });
 };

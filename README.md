@@ -29,6 +29,7 @@
 - [Stack Tecnológico](#-stack-tecnológico)
 - [Panel de Administración (`/admin`)](#-panel-de-administración-admin)
 - [Integraciones (Supabase & Cloudinary)](#-integraciones-supabase--cloudinary)
+- [Seguridad en Producción & RLS (`docs/`)](./docs/SECURITY_AND_PRODUCTION_SETUP.md)
 - [Estrategia de Email & Newsletter (`docs/`)](./docs/EMAIL_AND_NEWSLETTER_STRATEGY.md)
 - [SEO & Accesibilidad](#-seo--accesibilidad)
 - [Testing & Cobertura de Código](#-testing--cobertura-de-código)

@@ -94,6 +94,33 @@ describe('Zod Schemas Validation Suite', () => {
       const result = ProjectSchema.safeParse(validProject);
       expect(result.success).toBe(true);
     });
+
+    it('should accept safe local image paths and reject dangerous javascript: or data: URLs', () => {
+      const localPathItem = {
+        id: 'prj-local',
+        code: '304',
+        title: 'Pedal Local Image',
+        slug: 'pedal-local-image',
+        summary: 'Proyecto con imagen local segura servida desde public.',
+        description: 'Descripción completa del proyecto electrónico DIY con imagen local.',
+        category: 'cosas-interesantes',
+        imageUrl: '/images/placeholder.svg',
+        imageAlt: 'Placeholder local',
+      };
+      expect(ProjectSchema.safeParse(localPathItem).success).toBe(true);
+
+      const xssImageItem = {
+        ...localPathItem,
+        imageUrl: 'javascript:alert(1)',
+      };
+      expect(ProjectSchema.safeParse(xssImageItem).success).toBe(false);
+
+      const xssSchematicItem = {
+        ...localPathItem,
+        schematicUrl: 'javascript:alert(document.cookie)',
+      };
+      expect(ProjectSchema.safeParse(xssSchematicItem).success).toBe(false);
+    });
   });
 
   describe('ContactFormSchema & NewsletterSubscribeSchema', () => {

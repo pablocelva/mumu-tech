@@ -8,6 +8,8 @@ function getProcessEnv() {
     PUBLIC_CLOUDINARY_CLOUD_NAME: import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME || 'mumu-tech',
     CLOUDINARY_API_KEY: import.meta.env.CLOUDINARY_API_KEY,
     CLOUDINARY_API_SECRET: import.meta.env.CLOUDINARY_API_SECRET,
+    RESEND_API_KEY: import.meta.env.RESEND_API_KEY,
+    ADMIN_ALLOWED_EMAILS: import.meta.env.ADMIN_ALLOWED_EMAILS,
     ADMIN_SESSION_SECRET: import.meta.env.ADMIN_SESSION_SECRET || 'dev-secret-key-12345',
   };
 }

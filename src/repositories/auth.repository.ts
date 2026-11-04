@@ -1,18 +1,40 @@
 import type { AdminUser } from '../types';
 import { getSupabaseClient, isSupabaseConfigured } from '../lib/supabase';
+import { env } from '../lib/env';
+import { signDevToken, verifyDevToken } from '../lib/security';
 import type { AuthLoginData } from '../schemas';
 
-// Default mock admin credentials for zero-config demonstration / development
-const DEFAULT_ADMIN: AdminUser = {
-  id: 'admin-001',
+// Default mock admin account strictly restricted to local development / test environments
+const DEFAULT_DEV_ADMIN: AdminUser = {
+  id: 'admin-dev-001',
   email: 'admin@mumutech.com',
   role: 'admin',
 };
 
+function isAuthorizedAdminEmail(email: string | undefined): boolean {
+  if (!email) return false;
+  const allowlistRaw = env.ADMIN_ALLOWED_EMAILS?.trim();
+  if (!allowlistRaw) return true;
+
+  const allowed = allowlistRaw
+    .split(',')
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+
+  return allowed.includes(email.trim().toLowerCase());
+}
+
 class AuthRepository {
+  private allowDemoFallback: boolean = Boolean(import.meta.env.DEV || import.meta.env.MODE === 'test');
+
+  setAllowDemoFallback(allow: boolean): void {
+    this.allowDemoFallback = allow;
+  }
+
   async login(credentials: AuthLoginData): Promise<{ user: AdminUser | null; token: string | null; error?: string }> {
     const supabase = getSupabaseClient();
 
+    // When Supabase is configured, NEVER fall through to local demo credentials
     if (supabase && isSupabaseConfigured()) {
       try {
         const { data, error } = await supabase.auth.signInWithPassword({
@@ -20,41 +42,65 @@ class AuthRepository {
           password: credentials.password,
         });
 
-        if (error) {
-          return { user: null, token: null, error: error.message };
-        }
-
-        if (data.user && data.session) {
+        if (error || !data.user || !data.session) {
           return {
-            user: {
-              id: data.user.id,
-              email: data.user.email || credentials.email,
-              role: 'admin',
-            },
-            token: data.session.access_token,
+            user: null,
+            token: null,
+            error: error?.message || 'Credenciales inválidas.',
           };
         }
-      } catch (err) {
-        console.warn('Supabase auth failed, falling back to local verification:', err);
+
+        const resolvedEmail = data.user.email || credentials.email;
+        if (!isAuthorizedAdminEmail(resolvedEmail)) {
+          return {
+            user: null,
+            token: null,
+            error: 'Esta cuenta no tiene permisos de administrador.',
+          };
+        }
+
+        return {
+          user: {
+            id: data.user.id,
+            email: resolvedEmail,
+            role: 'admin',
+          },
+          token: data.session.access_token,
+        };
+      } catch {
+        return {
+          user: null,
+          token: null,
+          error: 'Error de conexión con el servicio de autenticación.',
+        };
       }
     }
 
-    // Local admin verification fallback (passwords accepted for demo: 'mumutech2026' or 'admin123')
+    // Production guard: forbid demo credentials if Supabase is missing in production
+    if (!this.allowDemoFallback) {
+      return {
+        user: null,
+        token: null,
+        error: 'Servicio de autenticación no configurado en producción.',
+      };
+    }
+
+    // Development / test only fallback with HMAC-SHA256 signed token
     if (
       credentials.email === 'admin@mumutech.com' &&
-      (credentials.password === 'mumutech2026' || credentials.password === 'admin123')
+      credentials.password === 'mumutech2026'
     ) {
-      const mockToken = `mumu_token_${Buffer.from(credentials.email + ':' + Date.now()).toString('base64')}`;
+      const signedToken = signDevToken(credentials.email, env.ADMIN_SESSION_SECRET);
       return {
-        user: DEFAULT_ADMIN,
-        token: mockToken,
+        user: DEFAULT_DEV_ADMIN,
+        token: signedToken,
       };
     }
 
     return {
       user: null,
       token: null,
-      error: 'Credenciales inválidas. Usa admin@mumutech.com / mumutech2026 para el modo demo.',
+      error: 'Credenciales inválidas.',
     };
   }
 
@@ -62,23 +108,32 @@ class AuthRepository {
     if (!token) return null;
 
     const supabase = getSupabaseClient();
+
+    // When Supabase is configured, strictly verify JWT against Supabase Auth (never accept dev tokens)
     if (supabase && isSupabaseConfigured()) {
       try {
         const { data: { user }, error } = await supabase.auth.getUser(token);
-        if (!error && user) {
+        if (!error && user && isAuthorizedAdminEmail(user.email)) {
           return {
             id: user.id,
-            email: user.email || 'admin@mumutech.com',
+            email: user.email!,
             role: 'admin',
           };
         }
       } catch {
-        // Fallback to local validation
+        return null;
       }
+      return null;
     }
 
-    if (token.startsWith('mumu_token_')) {
-      return DEFAULT_ADMIN;
+    // Development / test only HMAC token verification
+    if (!this.allowDemoFallback) {
+      return null;
+    }
+
+    const verifiedEmail = verifyDevToken(token, env.ADMIN_SESSION_SECRET);
+    if (verifiedEmail === DEFAULT_DEV_ADMIN.email) {
+      return DEFAULT_DEV_ADMIN;
     }
 
     return null;

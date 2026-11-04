@@ -1,10 +1,15 @@
 import { describe, it, expect } from 'vitest';
-import { getOptimizedImageUrl } from '../src/lib/cloudinary';
+import { DEFAULT_PLACEHOLDER_IMAGE, getOptimizedImageUrl } from '../src/lib/cloudinary';
 
 describe('Cloudinary Lib Unit Tests', () => {
-  it('should return fallback image when empty source provided', () => {
-    const url = getOptimizedImageUrl('');
-    expect(url).toContain('https://images.unsplash.com');
+  it('should return local SVG placeholder image when empty or null source provided', () => {
+    expect(getOptimizedImageUrl('')).toBe(DEFAULT_PLACEHOLDER_IMAGE);
+    expect(getOptimizedImageUrl('   ')).toBe(DEFAULT_PLACEHOLDER_IMAGE);
+    expect(getOptimizedImageUrl(null)).toBe(DEFAULT_PLACEHOLDER_IMAGE);
+  });
+
+  it('should preserve local asset paths starting with /', () => {
+    expect(getOptimizedImageUrl('/images/custom-pedal.jpg')).toBe('/images/custom-pedal.jpg');
   });
 
   it('should preserve standard external URL without changes', () => {

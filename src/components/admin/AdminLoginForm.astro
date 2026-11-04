@@ -1,6 +1,12 @@
 ---
 import styles from './AdminLoginForm.module.css';
 import Button from '../Button.astro';
+
+interface Props {
+  showDemoHint?: boolean;
+}
+
+const { showDemoHint = false } = Astro.props;
 ---
 
 <div class={styles.container}>
@@ -19,7 +25,7 @@ import Button from '../Button.astro';
         id="admin-email"
         name="email"
         required
-        value="admin@mumutech.com"
+        value={showDemoHint ? 'admin@mumutech.com' : ''}
         placeholder="admin@mumutech.com"
         class={styles.input}
         autocomplete="username"
@@ -33,7 +39,7 @@ import Button from '../Button.astro';
         id="admin-password"
         name="password"
         required
-        value="mumutech2026"
+        value={showDemoHint ? 'mumutech2026' : ''}
         placeholder="••••••••"
         class={styles.input}
         autocomplete="current-password"
@@ -45,11 +51,15 @@ import Button from '../Button.astro';
     </Button>
   </form>
 
-  <div class={styles.demoHint}>
-    <strong>MODO DEMO / DESARROLLO:</strong><br />
-    Usuario: <code>admin@mumutech.com</code><br />
-    Clave: <code>mumutech2026</code>
-  </div>
+  {
+    showDemoHint && (
+      <div class={styles.demoHint}>
+        <strong>MODO DEMO / DESARROLLO LOCAL:</strong><br />
+        Usuario: <code>admin@mumutech.com</code><br />
+        Clave: <code>mumutech2026</code>
+      </div>
+    )
+  }
 </div>
 
 <script>
@@ -74,14 +84,16 @@ import Button from '../Button.astro';
         const res = await fetch('/api/auth', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
           body: JSON.stringify(data),
         });
 
         const result = await res.json();
 
-        if (res.ok && result.success && result.data?.token) {
-          localStorage.setItem('mumu_admin_token', result.data.token);
-          localStorage.setItem('mumu_admin_user', JSON.stringify(result.data.user));
+        if (res.ok && result.success) {
+          // Session is stored in an HttpOnly SameSite=Strict cookie set by the server
+          localStorage.removeItem('mumu_admin_token');
+          localStorage.removeItem('mumu_admin_user');
           window.location.reload();
         } else {
           errorBox.style.display = 'block';

@@ -1,8 +1,12 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterEach } from 'vitest';
 import { authRepository } from '../src/repositories/auth.repository';
 
 describe('AuthRepository Unit Tests', () => {
-  it('should authenticate demo admin successfully', async () => {
+  afterEach(() => {
+    authRepository.setAllowDemoFallback(true);
+  });
+
+  it('should authenticate dev admin successfully with HMAC signed token', async () => {
     const result = await authRepository.login({
       email: 'admin@mumutech.com',
       password: 'mumutech2026',
@@ -11,7 +15,7 @@ describe('AuthRepository Unit Tests', () => {
     expect(result.user).not.toBeNull();
     expect(result.user?.email).toBe('admin@mumutech.com');
     expect(result.token).not.toBeNull();
-    expect(result.token?.startsWith('mumu_token_')).toBe(true);
+    expect(result.token?.startsWith('mumu_dev_')).toBe(true);
   });
 
   it('should reject invalid credentials', async () => {
@@ -25,7 +29,7 @@ describe('AuthRepository Unit Tests', () => {
     expect(result.error).toBeDefined();
   });
 
-  it('should verify a valid token', async () => {
+  it('should verify a valid HMAC signed dev token', async () => {
     const loginResult = await authRepository.login({
       email: 'admin@mumutech.com',
       password: 'mumutech2026',
@@ -36,11 +40,34 @@ describe('AuthRepository Unit Tests', () => {
     expect(user?.email).toBe('admin@mumutech.com');
   });
 
-  it('should reject invalid or empty token', async () => {
+  it('should reject forged legacy mumu_token_ or empty token', async () => {
     const user1 = await authRepository.verifyToken('');
     expect(user1).toBeNull();
 
-    const user2 = await authRepository.verifyToken('invalid_random_token_string');
+    const user2 = await authRepository.verifyToken('mumu_token_forged_anything');
     expect(user2).toBeNull();
+
+    const user3 = await authRepository.verifyToken('invalid_random_token_string');
+    expect(user3).toBeNull();
+  });
+
+  it('should completely block demo credentials and dev tokens when demo fallback is disabled (production mode)', async () => {
+    const devLogin = await authRepository.login({
+      email: 'admin@mumutech.com',
+      password: 'mumutech2026',
+    });
+
+    authRepository.setAllowDemoFallback(false);
+
+    const prodLogin = await authRepository.login({
+      email: 'admin@mumutech.com',
+      password: 'mumutech2026',
+    });
+    expect(prodLogin.user).toBeNull();
+    expect(prodLogin.token).toBeNull();
+    expect(prodLogin.error).toContain('producción');
+
+    const prodVerify = await authRepository.verifyToken(devLogin.token!);
+    expect(prodVerify).toBeNull();
   });
 });

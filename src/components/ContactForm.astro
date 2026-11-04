@@ -12,6 +12,11 @@ const { initialInterest = 'taller' } = Astro.props;
 <form id="contact-form" class={styles.form} novalidate>
   <div id="form-status" class={styles.statusMessage} role="alert" aria-live="polite"></div>
 
+  <div class="sr-only" aria-hidden="true">
+    <label for="contact-website">Sitio web (dejar en blanco)</label>
+    <input type="text" id="contact-website" name="website" tabindex="-1" autocomplete="off" />
+  </div>
+
   <div class={styles.fieldGroup}>
     <label for="contact-name" class={styles.label}>Nombre o Apodo *</label>
     <input
@@ -120,6 +125,7 @@ const { initialInterest = 'taller' } = Astro.props;
         interest: formData.get('interest'),
         message: formData.get('message'),
         subscribeNewsletter: formData.get('subscribeNewsletter') === 'true',
+        website: formData.get('website') || '',
       };
 
       try {

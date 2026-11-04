@@ -260,7 +260,7 @@ describe('Supabase Client and Repository Online Integration Tests', () => {
       expect(user?.email).toBe('online@mumutech.com');
     });
 
-    it('should fallback to local validation if Supabase getUser throws', async () => {
+    it('should return null and NEVER fall back to local demo token if Supabase getUser throws', async () => {
       const mockSupabase = {
         auth: {
           getUser: vi.fn().mockRejectedValue(new Error('Supabase Auth error')),
@@ -271,8 +271,41 @@ describe('Supabase Client and Repository Online Integration Tests', () => {
       supabaseLib.setSupabaseClient(mockSupabase as any);
 
       const user = await authRepository.verifyToken('mumu_token_fallback');
-      expect(user).not.toBeNull();
-      expect(user?.email).toBe('admin@mumutech.com');
+      expect(user).toBeNull();
+    });
+
+    it('should enforce ADMIN_ALLOWED_EMAILS allowlist when configured', async () => {
+      env.ADMIN_ALLOWED_EMAILS = 'owner@mumutech.com';
+      const mockSupabase = {
+        auth: {
+          signInWithPassword: vi.fn().mockResolvedValue({
+            data: {
+              user: { id: 'sb-intruder', email: 'other@random.com' },
+              session: { access_token: 'sb_jwt_other' },
+            },
+            error: null,
+          }),
+          getUser: vi.fn().mockResolvedValue({
+            data: { user: { id: 'sb-intruder', email: 'other@random.com' } },
+            error: null,
+          }),
+        },
+      };
+
+      vi.spyOn(supabaseLib, 'isSupabaseConfigured').mockReturnValue(true);
+      supabaseLib.setSupabaseClient(mockSupabase as any);
+
+      const loginRes = await authRepository.login({
+        email: 'other@random.com',
+        password: 'validpassword123',
+      });
+      expect(loginRes.user).toBeNull();
+      expect(loginRes.error).toContain('permisos');
+
+      const verifyRes = await authRepository.verifyToken('sb_jwt_other');
+      expect(verifyRes).toBeNull();
+
+      env.ADMIN_ALLOWED_EMAILS = undefined;
     });
   });
 });

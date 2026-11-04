@@ -25,10 +25,12 @@ export function getSupabaseClient(): SupabaseClient | null {
     return null;
   }
 
+  // Stateless configuration for SSR / Serverless functions (prevents cross-request session leaks)
   supabaseClient = createClient(env.PUBLIC_SUPABASE_URL, env.PUBLIC_SUPABASE_ANON_KEY, {
     auth: {
-      persistSession: true,
-      autoRefreshToken: true,
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
     },
   });
 

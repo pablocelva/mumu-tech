@@ -4,6 +4,12 @@ import Button from '../Button.astro';
 import Badge from '../Badge.astro';
 import { contentRepository } from '../../repositories/content.repository';
 
+interface Props {
+  userEmail?: string;
+}
+
+const { userEmail = 'admin@mumutech.com' } = Astro.props;
+
 const allItems = await contentRepository.getAllItems();
 const workshops = allItems.filter((i) => i.category === 'educativa');
 const services = allItems.filter((i) => i.category === 'servicios');
@@ -11,11 +17,11 @@ const projects = allItems.filter((i) => i.category === 'cosas-interesantes');
 const messages = await contentRepository.getContactMessages();
 ---
 
-<div class={styles.dashboard}>
+<div class={styles.dashboard} id="admin-dashboard-root" data-active-class={styles.active}>
   <div class={styles.topBar}>
     <div class={styles.userInfo}>
       <span style="color: #39ff14;">●</span>
-      <span>SESIÓN ACTIVA: <strong id="user-display-email">admin@mumutech.com</strong></span>
+      <span>SESIÓN ACTIVA: <strong id="user-display-email">{userEmail}</strong></span>
     </div>
 
     <div style="display: flex; gap: 0.75rem;">
@@ -237,60 +243,67 @@ const messages = await contentRepository.getContactMessages();
 </div>
 
 <script>
+  const dashboardRoot = document.getElementById('admin-dashboard-root');
+  const activeClass = dashboardRoot?.getAttribute('data-active-class') || 'active';
+
   // Tab switching logic
   const tabs = document.querySelectorAll('[data-tab]');
   tabs.forEach((tab) => {
     tab.addEventListener('click', () => {
       const target = tab.getAttribute('data-tab');
-      tabs.forEach((t) => t.classList.remove(styles.active || 'active'));
-      tab.classList.add(styles.active || 'active');
+      tabs.forEach((t) => t.classList.remove(activeClass));
+      tab.classList.add(activeClass);
 
       document.querySelectorAll('[role="tabpanel"]').forEach((p) => {
-        p.classList.remove(styles.active || 'active');
+        p.classList.remove(activeClass);
       });
 
       const panel = document.getElementById(`panel-${target}`);
       if (panel) {
-        panel.classList.add(styles.active || 'active');
+        panel.classList.add(activeClass);
       }
     });
   });
 
-  // Logout handler
+  // Logout handler (clears HttpOnly session cookie via server endpoint)
   const logoutBtn = document.getElementById('admin-logout-btn');
   if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
-      localStorage.removeItem('mumu_admin_token');
-      localStorage.removeItem('mumu_admin_user');
-      window.location.reload();
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        await fetch('/api/auth', { method: 'DELETE', credentials: 'same-origin' });
+      } finally {
+        localStorage.removeItem('mumu_admin_token');
+        localStorage.removeItem('mumu_admin_user');
+        window.location.reload();
+      }
     });
   }
 
-  // Delete handler
+  // Delete handler (authenticated automatically via HttpOnly SameSite=Strict cookie)
   document.querySelectorAll('[data-delete-id]').forEach((btn) => {
     btn.addEventListener('click', async () => {
       const id = btn.getAttribute('data-delete-id');
       if (id && confirm('¿Estás seguro de eliminar este elemento?')) {
-        const token = localStorage.getItem('mumu_admin_token') || '';
-        const res = await fetch(`/api/content?id=${id}`, {
+        const res = await fetch(`/api/content?id=${encodeURIComponent(id)}`, {
           method: 'DELETE',
-          headers: { Authorization: `Bearer ${token}` },
+          credentials: 'same-origin',
         });
         if (res.ok) {
           alert('Elemento eliminado exitosamente');
           window.location.reload();
+        } else {
+          alert('No autorizado o error al eliminar.');
         }
       }
     });
   });
 
-  // Create form handler
+  // Create form handler (authenticated automatically via HttpOnly SameSite=Strict cookie)
   const createForm = document.getElementById('create-content-form') as HTMLFormElement | null;
   if (createForm) {
     createForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const formData = new FormData(createForm);
-      const token = localStorage.getItem('mumu_admin_token') || '';
 
       const tagsRaw = (formData.get('tags') as string) || '';
       const tags = tagsRaw.split(',').map((t) => t.trim()).filter(Boolean);
@@ -318,8 +331,8 @@ const messages = await contentRepository.getContactMessages();
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
           },
+          credentials: 'same-origin',
           body: JSON.stringify(payload),
         });
 

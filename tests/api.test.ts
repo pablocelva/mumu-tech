@@ -1,12 +1,16 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { POST as contactHandler } from '../src/pages/api/contact';
-import { POST as authHandler } from '../src/pages/api/auth';
+import { POST as authHandler, DELETE as authLogoutHandler } from '../src/pages/api/auth';
 import { GET as contentGetHandler, POST as contentPostHandler, DELETE as contentDeleteHandler } from '../src/pages/api/content';
 import { contentRepository } from '../src/repositories/content.repository';
+import { authRepository } from '../src/repositories/auth.repository';
+import { ADMIN_COOKIE_NAME, authRateLimiter, contactRateLimiter } from '../src/lib/security';
 
 describe('API Route Handlers Integration Tests', () => {
   beforeEach(() => {
     contentRepository.resetToSeed();
+    contactRateLimiter.reset();
+    authRateLimiter.reset();
   });
 
   describe('POST /api/contact', () => {
@@ -23,7 +27,6 @@ describe('API Route Handlers Integration Tests', () => {
         }),
       });
 
-      // @ts-ignore
       const response = await contactHandler({ request } as any);
       const json = await response.json();
 
@@ -41,7 +44,6 @@ describe('API Route Handlers Integration Tests', () => {
         }),
       });
 
-      // @ts-ignore
       const response = await contactHandler({ request } as any);
       const json = await response.json();
 
@@ -49,6 +51,51 @@ describe('API Route Handlers Integration Tests', () => {
       expect(json.success).toBe(true);
       expect(json.data.email).toBe('synthlover@analog.com');
       expect(json.data.interest).toBe('newsletter');
+    });
+
+    it('should silently trap bots that fill the hidden honeypot field without storing spam', async () => {
+      const request = new Request('http://localhost/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'SpamBot',
+          email: 'bot@spam.com',
+          interest: 'otro',
+          message: 'Buy cheap crypto links right now!',
+          website: 'https://evil-spam.example',
+        }),
+      });
+
+      const response = await contactHandler({ request } as any);
+      expect(response.status).toBe(200);
+      const messages = await contentRepository.getContactMessages();
+      expect(messages.length).toBe(0);
+    });
+
+    it('should return 429 Too Many Requests when IP exceeds contact rate limit', async () => {
+      for (let i = 0; i < 5; i++) {
+        const req = new Request('http://localhost/api/contact', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-nf-client-connection-ip': '198.51.100.77',
+          },
+          body: JSON.stringify({ email: `user${i}@analog.com` }),
+        });
+        const res = await contactHandler({ request: req } as any);
+        expect(res.status).toBe(200);
+      }
+
+      const blockedReq = new Request('http://localhost/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-nf-client-connection-ip': '198.51.100.77',
+        },
+        body: JSON.stringify({ email: 'overflow@analog.com' }),
+      });
+      const blockedRes = await contactHandler({ request: blockedReq } as any);
+      expect(blockedRes.status).toBe(429);
     });
 
     it('should reject invalid payload with status 400', async () => {
@@ -62,7 +109,6 @@ describe('API Route Handlers Integration Tests', () => {
         }),
       });
 
-      // @ts-ignore
       const response = await contactHandler({ request } as any);
       expect(response.status).toBe(400);
       const json = await response.json();
@@ -70,8 +116,8 @@ describe('API Route Handlers Integration Tests', () => {
     });
   });
 
-  describe('POST /api/auth', () => {
-    it('should authenticate valid credentials and return token', async () => {
+  describe('POST & DELETE /api/auth', () => {
+    it('should authenticate valid credentials, return token, and set HttpOnly cookie', async () => {
       const request = new Request('http://localhost/api/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -81,13 +127,22 @@ describe('API Route Handlers Integration Tests', () => {
         }),
       });
 
-      // @ts-ignore
       const response = await authHandler({ request } as any);
       const json = await response.json();
+      const setCookie = response.headers.get('Set-Cookie') || '';
 
       expect(response.status).toBe(200);
       expect(json.success).toBe(true);
       expect(json.data.token).toBeDefined();
+      expect(setCookie).toContain(`${ADMIN_COOKIE_NAME}=`);
+      expect(setCookie).toContain('HttpOnly');
+      expect(setCookie).toContain('SameSite=Strict');
+    });
+
+    it('should clear session cookie on DELETE /api/auth', async () => {
+      const response = await authLogoutHandler({} as any);
+      expect(response.status).toBe(200);
+      expect(response.headers.get('Set-Cookie')).toContain('Max-Age=0');
     });
 
     it('should return 401 for wrong credentials', async () => {
@@ -100,7 +155,6 @@ describe('API Route Handlers Integration Tests', () => {
         }),
       });
 
-      // @ts-ignore
       const response = await authHandler({ request } as any);
       expect(response.status).toBe(401);
     });
@@ -109,7 +163,6 @@ describe('API Route Handlers Integration Tests', () => {
   describe('GET & POST & DELETE /api/content', () => {
     it('should retrieve items list or filtered by category', async () => {
       const url = new URL('http://localhost/api/content?category=educativa');
-      // @ts-ignore
       const response = await contentGetHandler({ url } as any);
       const json = await response.json();
 
@@ -118,20 +171,26 @@ describe('API Route Handlers Integration Tests', () => {
       expect(json.data.length).toBeGreaterThan(0);
     });
 
-    it('should block unauthorized POST requests', async () => {
+    it('should block unauthorized POST requests and forged legacy tokens', async () => {
       const request = new Request('http://localhost/api/content', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer mumu_token_forged',
+        },
         body: JSON.stringify({}),
       });
 
-      // @ts-ignore
       const response = await contentPostHandler({ request } as any);
       expect(response.status).toBe(401);
     });
 
-    it('should allow authorized POST and DELETE requests with valid token', async () => {
-      const validToken = `mumu_token_${Buffer.from('admin@mumutech.com:123').toString('base64')}`;
+    it('should allow authorized POST and DELETE requests via signed cookie or Bearer token', async () => {
+      const login = await authRepository.login({
+        email: 'admin@mumutech.com',
+        password: 'mumutech2026',
+      });
+      const validToken = login.token!;
 
       const newItem = {
         id: 'api-item-01',
@@ -153,12 +212,11 @@ describe('API Route Handlers Integration Tests', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${validToken}`,
+          Cookie: `${ADMIN_COOKIE_NAME}=${encodeURIComponent(validToken)}`,
         },
         body: JSON.stringify(newItem),
       });
 
-      // @ts-ignore
       const postResponse = await contentPostHandler({ request: postRequest } as any);
       expect(postResponse.status).toBe(201);
 
@@ -169,7 +227,6 @@ describe('API Route Handlers Integration Tests', () => {
         headers: { Authorization: `Bearer ${validToken}` },
       });
 
-      // @ts-ignore
       const deleteResponse = await contentDeleteHandler({ request: deleteRequest, url: deleteUrl } as any);
       expect(deleteResponse.status).toBe(200);
     });

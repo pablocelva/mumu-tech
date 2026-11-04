@@ -2,6 +2,15 @@
 import Layout from '../../layouts/Layout.astro';
 import AdminLoginForm from '../../components/admin/AdminLoginForm.astro';
 import AdminDashboard from '../../components/admin/AdminDashboard.astro';
+import { authRepository } from '../../repositories/auth.repository';
+import { extractSessionToken } from '../../lib/security';
+
+export const prerender = false;
+
+Astro.response.headers.set('Cache-Control', 'no-store, private');
+
+const sessionToken = extractSessionToken(Astro.request);
+const adminUser = sessionToken ? await authRepository.verifyToken(sessionToken) : null;
 ---
 
 <Layout
@@ -11,43 +20,12 @@ import AdminDashboard from '../../components/admin/AdminDashboard.astro';
   hideFooter={true}
 >
   <div class="container" style="max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem;">
-    
-    <!-- Auth Container toggled via client JavaScript -->
-    <div id="auth-view" style="display: none;">
-      <AdminLoginForm />
-    </div>
-
-    <div id="dashboard-view" style="display: none;">
-      <AdminDashboard />
-    </div>
-
+    {
+      adminUser ? (
+        <AdminDashboard userEmail={adminUser.email} />
+      ) : (
+        <AdminLoginForm showDemoHint={Boolean(import.meta.env.DEV)} />
+      )
+    }
   </div>
 </Layout>
-
-<script>
-  function evaluateSession() {
-    const token = localStorage.getItem('mumu_admin_token');
-    const authView = document.getElementById('auth-view');
-    const dashboardView = document.getElementById('dashboard-view');
-    const userEmailSpan = document.getElementById('user-display-email');
-    const storedUser = localStorage.getItem('mumu_admin_user');
-
-    if (token) {
-      if (authView) authView.style.display = 'none';
-      if (dashboardView) dashboardView.style.display = 'block';
-      if (userEmailSpan && storedUser) {
-        try {
-          const u = JSON.parse(storedUser);
-          userEmailSpan.textContent = u.email || 'admin@mumutech.com';
-        } catch {
-          userEmailSpan.textContent = 'admin@mumutech.com';
-        }
-      }
-    } else {
-      if (authView) authView.style.display = 'block';
-      if (dashboardView) dashboardView.style.display = 'none';
-    }
-  }
-
-  evaluateSession();
-</script>
