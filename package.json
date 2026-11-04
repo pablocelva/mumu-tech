@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "Mumu Tech - Talleres de electrónica DIY, pedales de guitarra, reparaciones y proyectos creativos.",
   "engines": {
-    "node": ">=22.12.0"
+    "node": ">=24.22.2"
   },
   "scripts": {
     "dev": "astro dev",
@@ -16,15 +16,15 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@astrojs/netlify": "^8.2.6",
+    "@astrojs/netlify": "^8.2.11",
     "@astrojs/sitemap": "^3.7.4",
-    "@supabase/supabase-js": "^2.117.2",
-    "astro": "^7.3.5",
-    "zod": "^4.6.5"
+    "@supabase/supabase-js": "^2.118.0",
+    "astro": "^7.4.5",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@vitest/coverage-v8": "^5.0.3",
-    "vitest": "^5.0.3"
+    "@vitest/coverage-v8": "^5.1.0",
+    "vitest": "^5.1.0"
   },
   "allowScripts": {
     "esbuild": true

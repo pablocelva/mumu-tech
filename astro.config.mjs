@@ -7,7 +7,7 @@ import sitemap from '@astrojs/sitemap';
 export default defineConfig({
   site: 'https://mumutech.netlify.app',
   output: 'server',
-  adapter: netlify(),
+  adapter: netlify({ imageCDN: false }),
   integrations: [sitemap()],
   scopedStyleStrategy: 'where',
 });
