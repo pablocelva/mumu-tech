@@ -5,21 +5,30 @@ import styles from './WorkshopCurriculum.module.css';
 interface Props {
   stages?: WorkshopStage[];
   learningOutcomes?: string[];
+  stagesHeading?: string;
+  outcomesHeading?: string;
+  ariaLabel?: string;
 }
 
-const { stages = [], learningOutcomes = [] } = Astro.props;
+const {
+  stages = [],
+  learningOutcomes = [],
+  stagesHeading = '[ PROGRAMA POR ETAPAS ]',
+  outcomesHeading = '[ EN ESTE TALLER APRENDERÁS ]',
+  ariaLabel = 'Programa y aprendizajes del taller',
+} = Astro.props;
 const hasStages = stages.length > 0;
 const hasOutcomes = learningOutcomes.length > 0;
 const isSingle = (hasStages && !hasOutcomes) || (!hasStages && hasOutcomes);
 ---
 
 {(hasStages || hasOutcomes) && (
-  <section class={styles.section} aria-label="Programa y aprendizajes del taller">
+  <section class={styles.section} aria-label={ariaLabel}>
     <div class={`${styles.twoColGrid} ${isSingle ? styles.singleColGrid : ''}`}>
       {hasStages && (
         <div class={styles.panel}>
           <h2 id="stages-heading" class={styles.heading}>
-            [ PROGRAMA POR ETAPAS ]
+            {stagesHeading}
           </h2>
           <ol class={styles.stagesList} aria-labelledby="stages-heading">
             {stages.map((st) => (
@@ -38,7 +47,7 @@ const isSingle = (hasStages && !hasOutcomes) || (!hasStages && hasOutcomes);
       {hasOutcomes && (
         <div class={styles.panel}>
           <h2 id="outcomes-heading" class={styles.heading}>
-            [ EN ESTE TALLER APRENDERÁS ]
+            {outcomesHeading}
           </h2>
           <ul class={styles.outcomesList} aria-labelledby="outcomes-heading">
             {learningOutcomes.map((outcome) => (
@@ -53,4 +62,3 @@ const isSingle = (hasStages && !hasOutcomes) || (!hasStages && hasOutcomes);
     </div>
   </section>
 )}
-

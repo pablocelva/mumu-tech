@@ -5,6 +5,9 @@ import Card from '../components/Card.astro';
 import SectionTagFilter from '../components/SectionTagFilter.astro';
 import { contentRepository } from '../repositories/content.repository';
 
+export const prerender = false;
+
+const sectionContent = await contentRepository.getSectionContent('cosas-interesantes');
 const projects = await contentRepository.getItemsByCategory('cosas-interesantes');
 ---
 
@@ -15,12 +18,8 @@ const projects = await contentRepository.getItemsByCategory('cosas-interesantes'
   <div class="container" style="max-width: 1100px; margin: 0 auto; padding: 0 1.5rem 4rem 1.5rem;">
     
     <SectionHeader
-      title="COSAS INTERESANTES & DIY"
-      descriptions={[
-        "Aquí comparto esquemáticos, bitácoras de construcción y experimentos libres con artefactos electrónicos que no entran en las categorías tradicionales: desde generadores de feedback de video para monitores CRT hasta sintetizadores construidos con chips lógicos CMOS y grabadoras de cinta modificadas.",
-        "La mayoría de estos proyectos son de código abierto / open hardware. Si construyes tu propia versión basándote en estas guías, etiquétanos o compártelo para seguir expandiendo la comunidad DIY de habla hispana.",
-        "Próximamente también tendremos kits DIY listos para armar y artefactos únicos disponibles en nuestra tienda."
-      ]}
+      title={sectionContent.title}
+      descriptions={sectionContent.descriptions}
     />
 
     <hr class="retroDivider" style="width: 100%; height: 1px; background: rgba(255, 255, 255, 0.2); border: none; margin: 2.5rem 0;" />

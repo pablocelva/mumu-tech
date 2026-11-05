@@ -1,5 +1,12 @@
 export type ContentCategory = 'educativa' | 'servicios' | 'cosas-interesantes';
 
+export interface SectionContent {
+  category: ContentCategory;
+  title: string;
+  descriptions: string[];
+  updatedAt: string;
+}
+
 export interface BaseItem {
   id: string;
   code: string; // e.g. "001", "002"
@@ -86,6 +93,9 @@ export interface ServiceItem extends BaseItem {
   estimatedTurnaround?: string;
   serviceType?: 'Reparación' | 'Modificación' | 'Calibración' | 'Custom Build';
   startingPrice?: number;
+  diagnosticFee?: number;
+  workflowSteps?: WorkshopStage[];
+  pricingNotes?: string[];
 }
 
 export interface ProjectItem extends BaseItem {
@@ -128,6 +138,23 @@ export interface WorkshopRegistration {
   subscribeNewsletter: boolean;
   reminderStatus: ReminderScheduleStatus;
   reminderScheduledAt?: string;
+  createdAt: string;
+}
+
+export type RepairTicketStatus = 'recibido' | 'en_diagnostico' | 'cotizado' | 'cerrado';
+
+export interface RepairTicket {
+  id: string;
+  ticketNumber: string;
+  serviceId: string;
+  serviceSlug: string;
+  serviceTitle: string;
+  clientName: string;
+  clientEmail: string;
+  equipmentBrandModel: string;
+  symptomsDescription: string;
+  status: RepairTicketStatus;
+  diagnosticFeeSnapshot?: number;
   createdAt: string;
 }
 

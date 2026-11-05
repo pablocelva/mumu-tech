@@ -1,0 +1,199 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Button from '../../components/Button.astro';
+import ServiceTicketForm from '../../components/service/ServiceTicketForm.astro';
+import WorkshopCurriculum from '../../components/workshop/WorkshopCurriculum.astro';
+import { contentRepository } from '../../repositories/content.repository';
+import { getOptimizedImageUrl, DEFAULT_PLACEHOLDER_IMAGE } from '../../lib/cloudinary';
+import type { ServiceItem } from '../../types';
+import styles from '../../styles/WorkshopDetail.module.css';
+
+export const prerender = false;
+
+const { slug = '' } = Astro.params;
+const foundItem = slug ? await contentRepository.getItemBySlug(slug) : null;
+const service =
+  foundItem && foundItem.category === 'servicios' && foundItem.published
+    ? (foundItem as ServiceItem)
+    : null;
+
+if (!service) {
+  Astro.response.status = 404;
+}
+
+const heroImg = service
+  ? getOptimizedImageUrl(service.imageUrl, { width: 1000, crop: 'fill' })
+  : DEFAULT_PLACEHOLDER_IMAGE;
+
+const isMod = service?.serviceType === 'Modificación';
+
+const formattedPrice =
+  service?.startingPrice !== undefined
+    ? isMod
+      ? `DESDE $${service.startingPrice.toLocaleString('es-CL')} CLP`
+      : `DIAGNÓSTICO DESDE $${service.startingPrice.toLocaleString('es-CL')} CLP`
+    : 'COTIZACIÓN CON TICKET';
+
+const mobileModalCta = isMod
+  ? 'ABRIR TICKET DE MODIFICACIÓN'
+  : 'ABRIR TICKET DE REPARACIÓN';
+---
+
+<Layout
+  title={service ? `${service.title} | Servicios Mumu Tech` : 'Servicio no encontrado | Mumu Tech'}
+  description={service ? service.summary : 'El servicio solicitado no se encuentra disponible.'}
+  image={service ? heroImg : undefined}
+>
+  <div class={`container ${styles.pageWrapper}`}>
+    <div class={styles.backLinkRow}>
+      <a href="/servicios" class={styles.backLink}>
+        ← VOLVER A SERVICIOS TÉCNICOS
+      </a>
+    </div>
+
+    {!service ? (
+      <section class={styles.notFoundBox} aria-labelledby="not-found-title">
+        <h1 id="not-found-title" class={styles.title}>
+          [ 404 · SERVICIO NO ENCONTRADO ]
+        </h1>
+        <p class={styles.descriptionText}>
+          El servicio que buscas no existe o no se encuentra habilitado actualmente.
+        </p>
+        <Button href="/servicios" variant="primary">
+          VER SERVICIOS DISPONIBLES
+        </Button>
+      </section>
+    ) : (
+      <>
+        {/* Bloque Superior (igual alineación 50/50 que Talleres): Formulario Ticket (Izquierda Desktop) + Info del Servicio (Derecha Desktop) */}
+        <div class={styles.heroSplitGrid}>
+          <aside class={styles.formColumn} aria-label="Formulario de apertura de ticket de reparación">
+            <ServiceTicketForm service={service} instanceId="desktop" />
+          </aside>
+
+          <article class={styles.infoColumn}>
+            <div class={styles.coverFrame}>
+              <img
+                src={heroImg}
+                alt={service.imageAlt}
+                class={styles.coverImg}
+                fetchpriority="high"
+                width="960"
+                height="540"
+                onerror={`this.onerror=null;this.src='${DEFAULT_PLACEHOLDER_IMAGE}';`}
+              />
+              <span class={styles.codePill}>SERVICIO #{service.code}</span>
+            </div>
+
+            <div class={styles.titleBlock}>
+              <h1 class={styles.title}>{service.title}</h1>
+              <div class={styles.specsRow}>
+                <span class={`${styles.specBadge} ${styles.specPrice}`}>{formattedPrice}</span>
+                {service.serviceType && (
+                  <span class={styles.specBadge}>🔧 {service.serviceType.toUpperCase()}</span>
+                )}
+                {service.estimatedTurnaround && (
+                  <span class={styles.specBadge}>⏱ {service.estimatedTurnaround.toUpperCase()}</span>
+                )}
+                <span class={styles.specBadge}>🎫 TICKET AUTOMÁTICO POR CORREO</span>
+              </div>
+            </div>
+
+            {/* Botón en Mobile & Tablet para abrir el modal <dialog> con el formulario de Ticket */}
+            <div class={styles.mobileRegisterBar}>
+              <Button
+                type="button"
+                variant="primary"
+                size="lg"
+                fullWidth
+                id="open-mobile-ticket-modal"
+              >
+                {mobileModalCta}
+              </Button>
+            </div>
+
+            <p class={styles.descriptionText}>{service.description}</p>
+          </article>
+        </div>
+
+        {/* Sección en 2 columnas (Desktop) / 1 columna (Tablet & Mobile): Proceso por Etapas + Valores y Cotización */}
+        <WorkshopCurriculum
+          stages={service.workflowSteps}
+          learningOutcomes={service.pricingNotes}
+          stagesHeading="[ PROCESO DEL SISTEMA DE TICKET ]"
+          outcomesHeading="[ VALORES E INFORMACIÓN DE COTIZACIÓN ]"
+          ariaLabel="Proceso de reparación y condiciones de cotización"
+        />
+
+        {/* Modal Formulario de Ticket para Mobile & Tablet */}
+        <dialog
+          id="mobile-ticket-modal"
+          class={styles.regDialog}
+          closedby="any"
+          aria-labelledby="mobile-ticket-modal-title"
+        >
+          <div class={styles.regDialogInner}>
+            <div class={styles.regDialogHeader}>
+              <div>
+                <span class={styles.regDialogBadge}>[ SISTEMA DE TICKET ]</span>
+                <h2 id="mobile-ticket-modal-title" class={styles.regDialogTitle}>
+                  {service.title}
+                </h2>
+              </div>
+              <form method="dialog">
+                <button
+                  type="submit"
+                  value="close"
+                  class={styles.regDialogClose}
+                  aria-label="Cerrar formulario de ticket"
+                >
+                  ✕
+                </button>
+              </form>
+            </div>
+
+            <ServiceTicketForm
+              service={service}
+              instanceId="modal"
+              inModal={true}
+            />
+          </div>
+        </dialog>
+      </>
+    )}
+  </div>
+</Layout>
+
+<script>
+  const openBtn = document.getElementById('open-mobile-ticket-modal');
+  const ticketDialog = document.getElementById(
+    'mobile-ticket-modal'
+  ) as HTMLDialogElement | null;
+
+  if (openBtn && ticketDialog) {
+    openBtn.addEventListener('click', () => {
+      ticketDialog.showModal();
+    });
+
+    ticketDialog.addEventListener('close', () => {
+      ticketDialog.returnValue = '';
+    });
+
+    // Fallback obligatorio para light-dismiss en navegadores sin soporte de <dialog closedby="any">
+    if (!('closedBy' in HTMLDialogElement.prototype)) {
+      ticketDialog.addEventListener('click', (event) => {
+        if (event.target !== ticketDialog) return;
+        const rect = ticketDialog.getBoundingClientRect();
+        const inside =
+          rect.top <= event.clientY &&
+          event.clientY <= rect.top + rect.height &&
+          rect.left <= event.clientX &&
+          event.clientX <= rect.left + rect.width;
+        if (!inside) {
+          ticketDialog.close();
+        }
+      });
+    }
+  }
+</script>
+

@@ -1,4 +1,37 @@
-import type { ContentItem, WorkshopItem, ServiceItem, ProjectItem } from '../types';
+import type { ContentItem, ContentCategory, SectionContent, WorkshopItem, ServiceItem, ProjectItem } from '../types';
+
+export const INITIAL_SECTION_CONTENTS: Record<ContentCategory, SectionContent> = {
+  educativa: {
+    category: 'educativa',
+    title: 'TALLERES EDUCATIVOS',
+    descriptions: [
+      'En esta sección encontrarás nuestros talleres prácticos donde construyes tus propios instrumentos y efectos de audio desde cero. No necesitas experiencia previa en electrónica ni ingeniería para comenzar: te enseñamos desde cómo tomar el cautín hasta cómo entender el flujo de la señal de audio.',
+      'Todos los talleres incluyen los componentes electrónicos seleccionados (transistores vintage, potenciómetros Alpha, jacks Neutrik, gabinetes de aluminio perforados) y te llevas a casa tu pedal o sintetizador 100% funcional y terminado.',
+      'Los cupos son reducidos (máximo 8 a 10 personas por sesión) para garantizar una atención personalizada en cada banco de trabajo.',
+    ],
+    updatedAt: '2026-11-05T12:00:00Z',
+  },
+  servicios: {
+    category: 'servicios',
+    title: 'SERVICIOS TÉCNICOS & MODS',
+    descriptions: [
+      '¿Tu pedal favorito mete ruido, mete zumbido o dejó de encender? ¿Quieres modificar la respuesta de tu distorsión clásica o adaptar un pedal vintage a 9V estándar? Ofrecemos diagnóstico transparente y reparación a nivel de componente.',
+      'Trabajamos con componentes de alta fidelidad, estaño con plata para máxima conductividad y realizamos pruebas exhaustivas de señal en osciloscopio y amplificador antes de cada entrega.',
+      'Aceptamos envíos desde todo el país y entregas directas en taller previa coordinación.',
+    ],
+    updatedAt: '2026-11-05T12:00:00Z',
+  },
+  'cosas-interesantes': {
+    category: 'cosas-interesantes',
+    title: 'COSAS INTERESANTES & DIY',
+    descriptions: [
+      'Aquí comparto esquemáticos, bitácoras de construcción y experimentos libres con artefactos electrónicos que no entran en las categorías tradicionales: desde generadores de feedback de video para monitores CRT hasta sintetizadores construidos con chips lógicos CMOS y grabadoras de cinta modificadas.',
+      'La mayoría de estos proyectos son de código abierto / open hardware. Si construyes tu propia versión basándote en estas guías, etiquétanos o compártelo para seguir expandiendo la comunidad DIY de habla hispana.',
+      'Próximamente también tendremos kits DIY listos para armar y artefactos únicos disponibles en nuestra tienda.',
+    ],
+    updatedAt: '2026-11-05T12:00:00Z',
+  },
+};
 
 export const INITIAL_WORKSHOPS: WorkshopItem[] = [
   {
@@ -648,8 +681,95 @@ export const INITIAL_WORKSHOPS: WorkshopItem[] = [
 
 export const INITIAL_SERVICES: ServiceItem[] = [
   {
-    id: 'srv-001',
+    id: 'srv-ticket-001',
+    code: '003',
+    title: 'REPARACIONES DE EQUIPOS',
+    slug: 'reparaciones-sistema-ticket',
+    summary: 'Ingreso mediante ticket numerado para diagnóstico, cotización y reparación de pedales de efectos y equipos electrónicos musicales.',
+    description: 'Servicio de revisión y reparación electrónica para pedales de efectos, fuentes de poder y equipos de audio mediante sistema de ticket. Al completar el formulario con la marca, modelo y síntomas de tu equipo, se genera automáticamente un número único de ticket y se envía un correo con el comprobante, los valores referenciales de revisión y las indicaciones para coordinar la entrega y cotización final.',
+    category: 'servicios',
+    imageUrl: 'https://images.unsplash.com/photo-1634246370421-15d6d198c4ab?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    imageAlt: 'Pedales de efectos abiertos sobre banco de servicio técnico electrónico',
+    tags: ['Reparaciones', 'Diagnóstico', 'Pedales', 'Audio'],
+    featured: true,
+    published: true,
+    serviceType: 'Reparación',
+    estimatedTurnaround: '3 a 7 días hábiles según repuestos',
+    startingPrice: 15000,
+    diagnosticFee: 15000,
+    workflowSteps: [
+      {
+        step: 'ETAPA 01',
+        title: 'Apertura de Ticket Automático',
+        description: 'Registra tu nombre, correo, marca/modelo del equipo y los síntomas. Recibirás en tu correo tu número de ticket junto con los valores base e instrucciones de recepción.',
+      },
+      {
+        step: 'ETAPA 02',
+        title: 'Diagnóstico en Banco y Cotización',
+        description: 'Se revisa el equipo electrónicamente para identificar el origen exacto de la falla y enviarte el presupuesto cerrado de mano de obra y repuestos asociados a tu ticket.',
+      },
+      {
+        step: 'ETAPA 03',
+        title: 'Reparación, Prueba y Entrega',
+        description: 'Tras aprobar la cotización se realiza la intervención técnica, prueba real de audio/alimentación y coordinación de retiro o despacho.',
+      },
+    ],
+    pricingNotes: [
+      'Revisión y diagnóstico inicial desde $15.000 CLP (monto abonable al valor total si apruebas la reparación).',
+      'Fallas mecánicas o de cableado (jacks, conectores DC, footswitch o soldaduras frías): cotización directa tras chequeo inicial.',
+      'Fallas en placa o recambio de componentes activos/pasivos: el valor final depende del tiempo de intervención y repuestos requeridos.',
+      'Ninguna reparación ni cargo adicional se ejecuta sin tu confirmación previa sobre la cotización enviada a tu correo.',
+    ],
+    createdAt: '2026-11-05T12:00:00Z',
+    updatedAt: '2026-11-05T12:00:00Z',
+  },
+  {
+    id: 'srv-ticket-002',
     code: '004',
+    title: 'MODIFICACIONES DE PEDALES',
+    slug: 'modificaciones-de-pedales',
+    summary: 'Ingreso mediante ticket para modificaciones habituales de sonido y circuito en pedales clásicos como Boss DS-1, Boss BD-2 Blues Driver, SD-1 y similares.',
+    description: 'Servicio de modificación electrónica con sistema de ticket enfocado en mejoras clásicas para pedales comerciales (por ejemplo Boss DS-1, Boss BD-2 Blues Driver, Boss SD-1, Ibanez Tube Screamer o ProCo RAT en versiones de placa tradicional). Al completar el formulario indicando el modelo de tu pedal y la mejora que buscas, se genera automáticamente tu número de ticket y recibes por correo los valores referenciales, verificación de compatibilidad e información de cotización.',
+    category: 'servicios',
+    imageUrl: 'https://images.unsplash.com/photo-1751887687425-64b20d82f344?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    imageAlt: 'Placa electrónica de pedal de guitarra con diodos de recorte y condensadores modificados',
+    tags: ['Modificaciones', 'Pedales', 'Boss DS-1', 'Blues Driver'],
+    featured: true,
+    published: true,
+    serviceType: 'Modificación',
+    estimatedTurnaround: '5 a 7 días hábiles',
+    startingPrice: 25000,
+    diagnosticFee: 25000,
+    workflowSteps: [
+      {
+        step: 'ETAPA 01',
+        title: 'Apertura de Ticket y Chequeo de Versión',
+        description: 'Indica tu nombre, correo, marca/modelo del pedal (ej. Boss DS-1 o Blues Driver BD-2) y la modificación buscada. Recibirás tu número de ticket por correo junto con los valores referenciales.',
+      },
+      {
+        step: 'ETAPA 02',
+        title: 'Revisión en Banco y Cotización Cerrada',
+        description: 'Se verifica que la placa del pedal sea versión modificable (through-hole) y que opere sin fallas previas, enviándote el presupuesto cerrado de componentes y mano de obra.',
+      },
+      {
+        step: 'ETAPA 03',
+        title: 'Modificación, Prueba de Audio y Entrega',
+        description: 'Tras aprobar la cotización se realiza la modificación cuidando las pistas originales, se prueba en amplificador y se coordina el retiro o despacho con tu ticket.',
+      },
+    ],
+    pricingNotes: [
+      'Modificaciones comunes desde $25.000 CLP (incluye componentes electrónicos estándar según el mod).',
+      'Ejemplos típicos: Boss DS-1 (mod de diodos/recorte y control de agudos para mayor cuerpo), Boss BD-2 Blues Driver (respuesta de graves tipo Phat y mayor suavidad en la caída de ganancia), Boss SD-1 / Tube Screamer (claridad y rango dinámico).',
+      'Adaptaciones funcionales frecuentes: selector externo de clipping (silicio/LED/asimétrico), conversión a conector 9V centro negativo estándar o cambio de switch true-bypass.',
+      'Importante: versiones recientes con componentes miniaturizados SMD pueden no admitir ciertas modificaciones; la factibilidad se confirma con tu ticket antes de cobrar o intervenir.',
+    ],
+    createdAt: '2026-11-05T12:30:00Z',
+    updatedAt: '2026-11-05T12:30:00Z',
+  },
+  // Servicios anteriores deshabilitados del sitio público pero conservados para gestión desde el CMS (/admin)
+  {
+    id: 'srv-001',
+    code: '201',
     title: 'REPARACIÓN & CALIBRACIÓN DE PEDALES DE EFECTOS',
     slug: 'reparacion-calibracion-pedales',
     summary: 'Diagnóstico profundo de ruido, cambio de footswitch 3PDT true-bypass, jacks neutrik, potenciómetros y recambio de condensadores secos.',
@@ -658,8 +778,8 @@ export const INITIAL_SERVICES: ServiceItem[] = [
     imageUrl: 'https://images.unsplash.com/photo-1634246370421-15d6d198c4ab?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     imageAlt: 'Pedales de efectos de guitarra abiertos en taller de reparación',
     tags: ['Reparación', 'True Bypass', 'Calibración', 'Pedalboard'],
-    featured: true,
-    published: true,
+    featured: false,
+    published: false,
     serviceType: 'Reparación',
     estimatedTurnaround: '3 a 5 días hábiles',
     startingPrice: 25000,
@@ -668,7 +788,7 @@ export const INITIAL_SERVICES: ServiceItem[] = [
   },
   {
     id: 'srv-002',
-    code: '005',
+    code: '202',
     title: 'MODIFICACIONES DE CIRCUITO & UPGRADES AUDIÓFILOS',
     slug: 'modificaciones-circuito-upgrades',
     summary: 'Mods clásicos: Keeley/Monte Allums para Boss SD-1/DS-1, clipping switches de diodos asimétricos, loops de efectos y mejoras de rango dinámico.',
@@ -677,8 +797,8 @@ export const INITIAL_SERVICES: ServiceItem[] = [
     imageUrl: 'https://images.unsplash.com/photo-1751887687425-64b20d82f344?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     imageAlt: 'Circuito impreso con diodos y condensadores modificados',
     tags: ['Mods', 'Clipping Mod', 'Low Noise', 'Custom Tone'],
-    featured: true,
-    published: true,
+    featured: false,
+    published: false,
     serviceType: 'Modificación',
     estimatedTurnaround: '5 a 7 días hábiles',
     startingPrice: 35000,
@@ -687,7 +807,7 @@ export const INITIAL_SERVICES: ServiceItem[] = [
   },
   {
     id: 'srv-003',
-    code: '006',
+    code: '203',
     title: 'MANTENIMIENTO DE AMPLIFICADORES A TUBOS Y ESTADO SÓLIDO',
     slug: 'mantenimiento-amplificadores-tubos',
     summary: 'Revalvulaje, ajuste de Bias con zócalos de medición, recaping de electrolíticos de alta tensión y limpieza ultrasónica de contactos.',
@@ -697,7 +817,7 @@ export const INITIAL_SERVICES: ServiceItem[] = [
     imageAlt: 'Válvulas de vacío encendidas en amplificador de audio',
     tags: ['Tubos', 'Amplificadores', 'Bias Check', 'Recaping'],
     featured: false,
-    published: true,
+    published: false,
     serviceType: 'Reparación',
     estimatedTurnaround: '7 a 10 días hábiles',
     startingPrice: 45000,

@@ -172,3 +172,81 @@
     gap: 1rem;
   }
 }
+
+.sectionsStack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.sectionEditorCard {
+  background: rgba(10, 10, 16, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 2px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sectionEditorHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.75rem;
+}
+
+.editorFieldLabel {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #b4b4ca;
+  text-transform: uppercase;
+  margin-bottom: 0.35rem;
+}
+
+.editorFieldHint {
+  display: block;
+  font-size: 0.8rem;
+  color: #8f8fa6;
+  margin-bottom: 0.4rem;
+}
+
+.editorInput,
+.editorTextarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.7rem 0.9rem;
+  background: #08080c;
+  color-scheme: dark;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  border-radius: 2px;
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.editorTextarea {
+  resize: vertical;
+  min-height: 130px;
+}
+
+.editorInput:focus-visible,
+.editorTextarea:focus-visible {
+  outline: 2px solid #00f0ff;
+  outline-offset: 2px;
+  border-color: #00f0ff;
+}
+
+.sectionSaveStatus {
+  display: none;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: 2px;
+}

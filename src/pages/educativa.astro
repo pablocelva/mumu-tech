@@ -5,6 +5,9 @@ import Card from '../components/Card.astro';
 import SectionTagFilter from '../components/SectionTagFilter.astro';
 import { contentRepository } from '../repositories/content.repository';
 
+export const prerender = false;
+
+const sectionContent = await contentRepository.getSectionContent('educativa');
 const workshops = await contentRepository.getItemsByCategory('educativa');
 ---
 
@@ -15,12 +18,8 @@ const workshops = await contentRepository.getItemsByCategory('educativa');
   <div class="container" style="max-width: 1100px; margin: 0 auto; padding: 0 1.5rem 4rem 1.5rem;">
     
     <SectionHeader
-      title="TALLERES EDUCATIVOS"
-      descriptions={[
-        "En esta sección encontrarás nuestros talleres prácticos donde construyes tus propios instrumentos y efectos de audio desde cero. No necesitas experiencia previa en electrónica ni ingeniería para comenzar: te enseñamos desde cómo tomar el cautín hasta cómo entender el flujo de la señal de audio.",
-        "Todos los talleres incluyen los componentes electrónicos seleccionados (transistores vintage, potenciómetros Alpha, jacks Neutrik, gabinetes de aluminio perforados) y te llevas a casa tu pedal o sintetizador 100% funcional y terminado.",
-        "Los cupos son reducidos (máximo 8 a 10 personas por sesión) para garantizar una atención personalizada en cada banco de trabajo."
-      ]}
+      title={sectionContent.title}
+      descriptions={sectionContent.descriptions}
     />
 
     <hr class="retroDivider" style="width: 100%; height: 1px; background: rgba(255, 255, 255, 0.2); border: none; margin: 2.5rem 0;" />

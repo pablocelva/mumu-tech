@@ -2,6 +2,15 @@ import { z } from 'zod';
 
 export const CategoryEnum = z.enum(['educativa', 'servicios', 'cosas-interesantes']);
 
+export const SectionContentSchema = z.object({
+  category: CategoryEnum,
+  title: z.string().trim().min(3, 'El título de sección debe tener al menos 3 caracteres').max(140),
+  descriptions: z
+    .array(z.string().trim().min(5, 'Cada párrafo debe tener al menos 5 caracteres').max(1500))
+    .min(1, 'Debes incluir al menos un párrafo descriptivo')
+    .max(8, 'Máximo 8 párrafos por sección'),
+});
+
 const SAFE_LOCAL_IMAGE_PATH = /^\/images\/[a-zA-Z0-9._/-]+$/;
 
 export const SafeImageUrlSchema = z
@@ -104,6 +113,9 @@ export const ServiceSchema = BaseItemSchema.extend({
   estimatedTurnaround: z.string().max(120).optional(),
   serviceType: z.enum(['Reparación', 'Modificación', 'Calibración', 'Custom Build']).optional(),
   startingPrice: z.number().nonnegative().optional(),
+  diagnosticFee: z.number().nonnegative().optional(),
+  workflowSteps: z.array(WorkshopStageSchema).max(12).optional(),
+  pricingNotes: z.array(z.string().min(3).max(320)).max(20).optional(),
 });
 
 export const ProjectSchema = BaseItemSchema.extend({
@@ -150,6 +162,25 @@ export const WorkshopRegistrationSchema = z.object({
   website: z.string().optional().default(''),
 });
 
+export const RepairTicketSchema = z.object({
+  serviceId: z.string().trim().min(1, 'El servicio es requerido').max(100),
+  serviceSlug: z.string().trim().min(2, 'El slug del servicio es requerido').max(180),
+  serviceTitle: z.string().trim().min(3, 'El título del servicio es requerido').max(180),
+  clientName: z.string().trim().min(2, 'Ingresa tu nombre (mínimo 2 caracteres)').max(120, 'Nombre demasiado extenso'),
+  clientEmail: z.string().trim().email('Ingresa un correo electrónico válido').max(254),
+  equipmentBrandModel: z
+    .string()
+    .trim()
+    .min(2, 'Indica la marca y modelo del equipo')
+    .max(180, 'Marca y modelo demasiado extensos'),
+  symptomsDescription: z
+    .string()
+    .trim()
+    .min(10, 'Describe los síntomas o el problema con al menos 10 caracteres')
+    .max(3000, 'Descripción demasiado extensa'),
+  website: z.string().optional().default(''),
+});
+
 export const AuthLoginSchema = z.object({
   email: z.string().trim().email('Correo electrónico inválido').max(254),
   password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres').max(256),
@@ -170,7 +201,9 @@ export const EnvSchema = z.object({
   ADMIN_SESSION_SECRET: z.string().optional().default('dev-secret-key-12345'),
 });
 
+export type SectionContentInput = z.infer<typeof SectionContentSchema>;
 export type ContactFormData = z.infer<typeof ContactFormSchema>;
 export type WorkshopRegistrationData = z.infer<typeof WorkshopRegistrationSchema>;
+export type RepairTicketData = z.infer<typeof RepairTicketSchema>;
 export type AuthLoginData = z.infer<typeof AuthLoginSchema>;
 export type ContentItemInput = z.infer<typeof ContentItemSchema>;

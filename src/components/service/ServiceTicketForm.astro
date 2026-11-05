@@ -1,0 +1,302 @@
+---
+import type { ServiceItem } from '../../types';
+import Button from '../Button.astro';
+import styles from './ServiceTicketForm.module.css';
+
+interface Props {
+  service: ServiceItem;
+  instanceId: 'desktop' | 'modal';
+  inModal?: boolean;
+}
+
+const { service, instanceId, inModal = false } = Astro.props;
+const p = `srv-tkt-${instanceId}`;
+const isMod = service.serviceType === 'Modificación';
+
+const formHeading = isMod ? 'SOLICITAR MODIFICACIÓN' : 'SOLICITAR REPARACIÓN';
+const formSubtitle = isMod
+  ? 'Indica tu pedal y la modificación que buscas para generar tu número de ticket y recibir en tu correo los valores e información de cotización.'
+  : 'Completa los datos de tu equipo para generar tu número de ticket y recibir en tu correo los valores e información de cotización.';
+const equipmentPlaceholder = isMod
+  ? 'Ej: Boss DS-1, Boss BD-2 Blues Driver, Boss SD-1, Ibanez TS9...'
+  : 'Ej: Boss DD-7, Electro-Harmonix Big Muff, MXR Carbon Copy...';
+const detailLabel = isMod
+  ? 'Modificación Buscada / Descripción del Ajuste'
+  : 'Síntomas / Descripción del Problema';
+const detailHint = isMod
+  ? 'Comenta qué cambio buscas (ej: mod de cuerpo/clipping en Boss DS-1, mod Phat en Blues Driver BD-2, switch adicional o ajuste de tono).'
+  : 'Describe qué falla presenta (no enciende, mete ruido, corte de señal, falla en switch o alimentación).';
+const detailPlaceholder = isMod
+  ? 'Describe la modificación que te interesa o qué aspecto del sonido quieres mejorar en tu pedal...'
+  : 'Detalla qué ocurre con el equipo y en qué condiciones aparece el problema...';
+const submitText = isMod ? 'GENERAR TICKET DE MODIFICACIÓN' : 'GENERAR TICKET DE REPARACIÓN';
+---
+
+<form
+  id={`${p}-form`}
+  data-service-ticket-form
+  action="/api/service-ticket"
+  method="POST"
+  class={`${styles.formCard} ${inModal ? styles.formCardModal : ''}`}
+>
+  {!inModal && (
+    <div class={styles.formHeader}>
+      <span class={styles.formBadge}>[ APERTURA DE TICKET ]</span>
+      <h2 class={styles.formTitle}>{formHeading}</h2>
+      <p class={styles.formSubtitle}>
+        {formSubtitle}
+      </p>
+    </div>
+  )}
+
+  <div
+    id={`${p}-status`}
+    data-ticket-status
+    class={styles.statusMessage}
+    role="status"
+    aria-live="polite"
+  ></div>
+
+  <input type="hidden" name="serviceId" value={service.id} />
+  <input type="hidden" name="serviceSlug" value={service.slug} />
+  <input type="hidden" name="serviceTitle" value={service.title} />
+
+  <div class={styles.visuallyHidden} aria-hidden="true">
+    <label for={`${p}-website`}>Sitio web (dejar vacío)</label>
+    <input
+      type="text"
+      id={`${p}-website`}
+      name="website"
+      tabindex="-1"
+      autocomplete="off"
+    />
+  </div>
+
+  <div class={styles.fieldGroup}>
+    <label for={`${p}-client-name`} class={styles.label}>
+      Nombre Cliente <span class={styles.requiredStar} aria-hidden="true">*</span>
+    </label>
+    <input
+      type="text"
+      id={`${p}-client-name`}
+      name="clientName"
+      required
+      minlength="2"
+      maxlength="120"
+      placeholder="Tu nombre completo"
+      autocomplete="name"
+      enterkeyhint="next"
+      autofocus={inModal ? true : undefined}
+      class={styles.input}
+      aria-errormessage={`${p}-client-name-err`}
+    />
+    <div id={`${p}-client-name-err`} class={styles.errorMsg}>
+      <span aria-hidden="true">⚠</span> Ingresa tu nombre (mínimo 2 caracteres).
+    </div>
+  </div>
+
+  <div class={styles.fieldGroup}>
+    <label for={`${p}-client-email`} class={styles.label}>
+      Mail Cliente <span class={styles.requiredStar} aria-hidden="true">*</span>
+    </label>
+    <span id={`${p}-client-email-hint`} class={styles.hint}>
+      Aquí enviaremos tu número de ticket e información de cotización.
+    </span>
+    <input
+      type="email"
+      id={`${p}-client-email`}
+      name="clientEmail"
+      required
+      inputmode="email"
+      placeholder="tu-correo@ejemplo.com"
+      autocomplete="email"
+      autocorrect="off"
+      autocapitalize="off"
+      spellcheck="false"
+      enterkeyhint="next"
+      class={styles.input}
+      aria-describedby={`${p}-client-email-hint`}
+      aria-errormessage={`${p}-client-email-err`}
+    />
+    <div id={`${p}-client-email-err`} class={styles.errorMsg}>
+      <span aria-hidden="true">⚠</span> Ingresa un correo electrónico válido.
+    </div>
+  </div>
+
+  <div class={styles.fieldGroup}>
+    <label for={`${p}-equipment`} class={styles.label}>
+      Marca y Modelo del Equipo <span class={styles.requiredStar} aria-hidden="true">*</span>
+    </label>
+    <input
+      type="text"
+      id={`${p}-equipment`}
+      name="equipmentBrandModel"
+      required
+      minlength="2"
+      maxlength="180"
+      placeholder={equipmentPlaceholder}
+      enterkeyhint="next"
+      class={styles.input}
+      aria-errormessage={`${p}-equipment-err`}
+    />
+    <div id={`${p}-equipment-err`} class={styles.errorMsg}>
+      <span aria-hidden="true">⚠</span> Indica la marca y el modelo del equipo.
+    </div>
+  </div>
+
+  <div class={styles.fieldGroup}>
+    <label for={`${p}-symptoms`} class={styles.label}>
+      {detailLabel} <span class={styles.requiredStar} aria-hidden="true">*</span>
+    </label>
+    <span id={`${p}-symptoms-hint`} class={styles.hint}>
+      {detailHint}
+    </span>
+    <textarea
+      id={`${p}-symptoms`}
+      name="symptomsDescription"
+      required
+      minlength="10"
+      maxlength="3000"
+      rows="4"
+      placeholder={detailPlaceholder}
+      class={styles.textarea}
+      aria-describedby={`${p}-symptoms-hint`}
+      aria-errormessage={`${p}-symptoms-err`}
+    ></textarea>
+    <div id={`${p}-symptoms-err`} class={styles.errorMsg}>
+      <span aria-hidden="true">⚠</span> Ingresa al menos 10 caracteres de detalle.
+    </div>
+  </div>
+
+  <div class={styles.submitWrap}>
+    <Button type="submit" variant="primary" size="lg" fullWidth data-ticket-submit>
+      {submitText}
+    </Button>
+  </div>
+</form>
+
+<script>
+  const initUserInvalidFallback = (root: ParentNode) => {
+    if (typeof CSS !== 'undefined' && CSS.supports && CSS.supports('selector(:user-invalid)')) {
+      return;
+    }
+    const dirty = new WeakMap<Element, { interacted: boolean; blurred: boolean }>();
+    const update = (el: HTMLInputElement | HTMLTextAreaElement) => {
+      const valid = el.checkValidity();
+      el.classList.toggle('user-invalid-fallback', !valid);
+      if (!valid) {
+        el.setAttribute('aria-invalid', 'true');
+      } else {
+        el.removeAttribute('aria-invalid');
+      }
+    };
+
+    root.addEventListener(
+      'blur',
+      (e) => {
+        const t = e.target as HTMLInputElement | HTMLTextAreaElement;
+        if (!t || typeof t.checkValidity !== 'function') return;
+        const st = dirty.get(t) || { interacted: false, blurred: false };
+        st.blurred = true;
+        dirty.set(t, st);
+        if (st.interacted) update(t);
+      },
+      true
+    );
+
+    const onEdit = (e: Event) => {
+      const t = e.target as HTMLInputElement | HTMLTextAreaElement;
+      if (!t || typeof t.checkValidity !== 'function') return;
+      const st = dirty.get(t) || { interacted: false, blurred: false };
+      st.interacted = true;
+      dirty.set(t, st);
+      if (st.blurred) update(t);
+    };
+
+    root.addEventListener('input', onEdit);
+    root.addEventListener('change', onEdit);
+  };
+
+  const syncAriaInvalid = (el: EventTarget | null) => {
+    if (!(el instanceof HTMLElement)) return;
+    if (typeof CSS !== 'undefined' && CSS.supports?.('selector(:user-invalid)')) {
+      el.setAttribute('aria-invalid', el.matches(':user-invalid') ? 'true' : 'false');
+    }
+  };
+
+  const forms = document.querySelectorAll<HTMLFormElement>('form[data-service-ticket-form]');
+  forms.forEach((form) => {
+    if (form.dataset.bound === 'true') return;
+    form.dataset.bound = 'true';
+
+    initUserInvalidFallback(form);
+    form.addEventListener('blur', (e) => syncAriaInvalid(e.target), true);
+    form.addEventListener('input', (e) => {
+      if (e.target instanceof HTMLElement && e.target.hasAttribute('aria-invalid')) {
+        syncAriaInvalid(e.target);
+      }
+    });
+
+    const statusEl = form.querySelector<HTMLElement>('[data-ticket-status]');
+    const submitBtn = form.querySelector<HTMLButtonElement>('[data-ticket-submit]');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      if (!statusEl || !submitBtn) return;
+
+      const originalLabel = submitBtn.textContent || 'GENERAR TICKET DE REPARACIÓN';
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'GENERANDO TICKET...';
+      statusEl.style.display = 'none';
+      statusEl.textContent = '';
+
+      const fd = new FormData(form);
+      const payload = {
+        serviceId: String(fd.get('serviceId') || ''),
+        serviceSlug: String(fd.get('serviceSlug') || ''),
+        serviceTitle: String(fd.get('serviceTitle') || ''),
+        clientName: String(fd.get('clientName') || ''),
+        clientEmail: String(fd.get('clientEmail') || ''),
+        equipmentBrandModel: String(fd.get('equipmentBrandModel') || ''),
+        symptomsDescription: String(fd.get('symptomsDescription') || ''),
+        website: String(fd.get('website') || ''),
+      };
+
+      try {
+        const res = await fetch('/api/service-ticket', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const result = await res.json();
+
+        if (res.ok && result.success) {
+          statusEl.style.cssText =
+            'display:block;background:rgba(57,255,20,0.14);border:1px solid #39ff14;color:#9cff89;padding:0.9rem 1rem;border-radius:2px;font-family:monospace;';
+          statusEl.textContent =
+            '✓ ' + (result.message || '¡Ticket generado con éxito! Revisa tu correo electrónico.');
+          form.reset();
+        } else {
+          statusEl.style.cssText =
+            'display:block;background:rgba(255,42,133,0.15);border:1px solid #ff2a85;color:#ff9ec7;padding:0.9rem 1rem;border-radius:2px;font-family:monospace;';
+          statusEl.textContent =
+            '⚠ ' + (result.error || 'Revisa los campos obligatorios e intenta nuevamente.');
+        }
+      } catch {
+        statusEl.style.cssText =
+          'display:block;background:rgba(255,42,133,0.15);border:1px solid #ff2a85;color:#ff9ec7;padding:0.9rem 1rem;border-radius:2px;font-family:monospace;';
+        statusEl.textContent = '⚠ Error de conexión. Intenta nuevamente en unos segundos.';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalLabel;
+      }
+    });
+  });
+</script>
+

@@ -27,8 +27,17 @@ describe('ContentRepository Unit Tests', () => {
     expect(allWorkshops.filter((i) => !i.published).length).toBe(3);
 
     const services = await contentRepository.getItemsByCategory('servicios');
-    expect(services.length).toBeGreaterThanOrEqual(3);
-    services.forEach((item) => expect(item.category).toBe('servicios'));
+    expect(services.length).toBe(2);
+    services.forEach((item) => {
+      expect(item.category).toBe('servicios');
+      expect(item.published).toBe(true);
+    });
+
+    const allServices = (await contentRepository.getAllItems()).filter(
+      (i) => i.category === 'servicios'
+    );
+    expect(allServices.length).toBe(5);
+    expect(allServices.filter((i) => !i.published).length).toBe(3);
 
     const projects = await contentRepository.getItemsByCategory('cosas-interesantes');
     expect(projects.length).toBeGreaterThanOrEqual(3);
