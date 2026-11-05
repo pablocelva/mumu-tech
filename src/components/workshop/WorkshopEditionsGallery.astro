@@ -1,0 +1,258 @@
+---
+import type { WorkshopPastEdition } from '../../types';
+import { getOptimizedImageUrl, DEFAULT_PLACEHOLDER_IMAGE } from '../../lib/cloudinary';
+import styles from './WorkshopEditionsGallery.module.css';
+
+interface Props {
+  editions?: WorkshopPastEdition[];
+}
+
+const { editions = [] } = Astro.props;
+
+const flattenedPhotos = editions.flatMap((edition) =>
+  edition.photos.map((photo) => ({
+    editionId: edition.id,
+    editionLabel: edition.editionLabel,
+    dateLabel: edition.dateLabel,
+    url: getOptimizedImageUrl(photo.url, { width: 900, crop: 'fill' }),
+    alt: photo.alt,
+    caption: photo.caption || photo.alt,
+  }))
+);
+---
+
+{editions.length > 0 && (
+  <section class={styles.section} aria-labelledby="past-editions-heading" data-editions-gallery>
+    <div class={styles.headerBlock}>
+      <p class={styles.kicker}>[ REGISTRO HISTÓRICO DEL TALLER ]</p>
+      <h2 id="past-editions-heading" class={styles.heading}>
+        EDICIONES ANTERIORES &amp; GALERÍA
+      </h2>
+    </div>
+
+    {editions.length > 1 && (
+      <div class={styles.filterRow} role="group" aria-label="Filtrar galería por edición">
+        <button
+          type="button"
+          class={styles.filterBtn}
+          data-edition-filter="all"
+          aria-pressed="true"
+        >
+          TODAS ({flattenedPhotos.length})
+        </button>
+        {editions.map((ed) => (
+          <button
+            type="button"
+            class={styles.filterBtn}
+            data-edition-filter={ed.id}
+            aria-pressed="false"
+          >
+            {ed.editionLabel} · {ed.dateLabel}
+          </button>
+        ))}
+      </div>
+    )}
+
+    <div class={styles.editionsInfoGrid}>
+      {editions.map((ed) => (
+        <article class={styles.editionInfoCard} data-edition-summary={ed.id}>
+          <div class={styles.editionInfoMeta}>
+            <span>{ed.dateLabel}</span>
+            {ed.location && <span>📍 {ed.location}</span>}
+            {ed.participantsCount && <span>👥 {ed.participantsCount} armadores</span>}
+          </div>
+          <h3 class={styles.editionInfoTitle}>{ed.editionLabel}</h3>
+          <p class={styles.editionInfoSummary}>{ed.summary}</p>
+        </article>
+      ))}
+    </div>
+
+    <div class={styles.photoGrid}>
+      {flattenedPhotos.map((item, idx) => (
+        <button
+          type="button"
+          class={styles.photoCardBtn}
+          data-gallery-item
+          data-edition-id={item.editionId}
+          data-photo-index={idx}
+          data-full-src={item.url}
+          data-alt={item.alt}
+          data-caption={item.caption}
+          data-edition-title={`${item.editionLabel} (${item.dateLabel})`}
+          aria-label={`Ampliar foto: ${item.alt}`}
+        >
+          <div class={styles.thumbWrap}>
+            <img
+              src={item.url}
+              alt={item.alt}
+              class={styles.thumbImg}
+              loading="lazy"
+              width="600"
+              height="450"
+              onerror={`this.onerror=null;this.src='${DEFAULT_PLACEHOLDER_IMAGE}';`}
+            />
+          </div>
+          <div class={styles.cardCaptionBar}>
+            <span class={styles.cardEditionTag}>
+              {item.editionLabel} · {item.dateLabel}
+            </span>
+            <span class={styles.cardCaptionText}>{item.caption}</span>
+          </div>
+        </button>
+      ))}
+    </div>
+
+    <dialog
+      id="workshop-gallery-lightbox"
+      class={styles.lightboxDialog}
+      closedby="any"
+      aria-labelledby="gallery-lightbox-title"
+    >
+      <div class={styles.lightboxInner}>
+        <div class={styles.lightboxTop}>
+          <div class={styles.lightboxBadgeGroup}>
+            <span class={styles.lightboxCounter} data-lb-counter>FOTO 1 DE 1</span>
+            <h3 id="gallery-lightbox-title" class={styles.lightboxTitle} data-lb-title>
+              EDICIÓN ANTERIOR
+            </h3>
+          </div>
+          <form method="dialog">
+            <button
+              type="submit"
+              value="close"
+              class={styles.closeBtn}
+              aria-label="Cerrar visor de fotos"
+              autofocus
+            >
+              ✕
+            </button>
+          </form>
+        </div>
+
+        <div class={styles.lightboxImageWrap}>
+          <img
+            src={DEFAULT_PLACEHOLDER_IMAGE}
+            alt=""
+            class={styles.lightboxImg}
+            fetchpriority="low"
+            data-lb-img
+            onerror={`this.onerror=null;this.src='${DEFAULT_PLACEHOLDER_IMAGE}';`}
+          />
+        </div>
+
+        <div class={styles.lightboxFooter}>
+          <p class={styles.lightboxCaption} data-lb-caption></p>
+          <div class={styles.navControls}>
+            <button type="button" class={styles.navBtn} data-lb-prev>
+              ← ANTERIOR
+            </button>
+            <button type="button" class={styles.navBtn} data-lb-next>
+              SIGUIENTE →
+            </button>
+          </div>
+        </div>
+      </div>
+    </dialog>
+  </section>
+)}
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-editions-gallery]');
+  if (root) {
+    const filterBtns = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-edition-filter]'));
+    const summaryCards = Array.from(root.querySelectorAll<HTMLElement>('[data-edition-summary]'));
+    const photoBtns = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-gallery-item]'));
+    const dialog = root.querySelector<HTMLDialogElement>('#workshop-gallery-lightbox');
+
+    const lbImg = dialog?.querySelector<HTMLImageElement>('[data-lb-img]');
+    const lbTitle = dialog?.querySelector<HTMLElement>('[data-lb-title]');
+    const lbCaption = dialog?.querySelector<HTMLElement>('[data-lb-caption]');
+    const lbCounter = dialog?.querySelector<HTMLElement>('[data-lb-counter]');
+    const prevBtn = dialog?.querySelector<HTMLButtonElement>('[data-lb-prev]');
+    const nextBtn = dialog?.querySelector<HTMLButtonElement>('[data-lb-next]');
+
+    let currentVisibleItems: HTMLButtonElement[] = [...photoBtns];
+    let currentIndex = 0;
+
+    const renderSlide = (idx: number) => {
+      if (currentVisibleItems.length === 0) return;
+      currentIndex = (idx + currentVisibleItems.length) % currentVisibleItems.length;
+      const target = currentVisibleItems[currentIndex];
+      if (!target) return;
+
+      if (lbImg) {
+        lbImg.src = target.dataset.fullSrc || '/images/placeholder.svg';
+        lbImg.alt = target.dataset.alt || '';
+      }
+      if (lbTitle) lbTitle.textContent = target.dataset.editionTitle || '';
+      if (lbCaption) lbCaption.textContent = target.dataset.caption || '';
+      if (lbCounter) {
+        lbCounter.textContent = `FOTO ${currentIndex + 1} DE ${currentVisibleItems.length}`;
+      }
+    };
+
+    filterBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const selected = btn.dataset.editionFilter || 'all';
+        filterBtns.forEach((b) =>
+          b.setAttribute('aria-pressed', b === btn ? 'true' : 'false')
+        );
+
+        summaryCards.forEach((card) => {
+          const match = selected === 'all' || card.dataset.editionSummary === selected;
+          card.hidden = !match;
+        });
+
+        currentVisibleItems = [];
+        photoBtns.forEach((pBtn) => {
+          const match = selected === 'all' || pBtn.dataset.editionId === selected;
+          pBtn.hidden = !match;
+          if (match) currentVisibleItems.push(pBtn);
+        });
+      });
+    });
+
+    photoBtns.forEach((pBtn) => {
+      pBtn.addEventListener('click', () => {
+        if (!dialog) return;
+        const pos = currentVisibleItems.indexOf(pBtn);
+        renderSlide(pos >= 0 ? pos : 0);
+        dialog.showModal();
+      });
+    });
+
+    prevBtn?.addEventListener('click', () => renderSlide(currentIndex - 1));
+    nextBtn?.addEventListener('click', () => renderSlide(currentIndex + 1));
+
+    dialog?.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        renderSlide(currentIndex - 1);
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        renderSlide(currentIndex + 1);
+      }
+    });
+
+    dialog?.addEventListener('close', () => {
+      if (dialog) dialog.returnValue = '';
+    });
+
+    // Fallback obligatorio para navegadores sin soporte nativo de <dialog closedby="any">
+    if (dialog && !('closedBy' in HTMLDialogElement.prototype)) {
+      dialog.addEventListener('click', (event) => {
+        if (event.target !== dialog) return;
+        const rect = dialog.getBoundingClientRect();
+        const inside =
+          rect.top <= event.clientY &&
+          event.clientY <= rect.top + rect.height &&
+          rect.left <= event.clientX &&
+          event.clientX <= rect.left + rect.width;
+        if (!inside) {
+          dialog.close();
+        }
+      });
+    }
+  }
+</script>
+

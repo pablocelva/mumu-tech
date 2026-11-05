@@ -12,6 +12,10 @@
   margin-bottom: 2.5rem;
 }
 
+.card[hidden] {
+  display: none;
+}
+
 .card:hover {
   border-color: rgba(0, 240, 255, 0.5);
   box-shadow: 0 12px 36px rgba(0, 240, 255, 0.15);
@@ -81,13 +85,27 @@
   transform: scale(1.04);
 }
 
+.cardFooter {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
 .footerActions {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 1rem;
-  margin-top: 1rem;
+}
+
+.badgesRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .priceTag {

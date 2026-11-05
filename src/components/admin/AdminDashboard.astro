@@ -61,6 +61,7 @@ const messages = await contentRepository.getContactMessages();
           <tr>
             <th>CÓD</th>
             <th>TÍTULO</th>
+            <th>ESTADO</th>
             <th>NIVEL</th>
             <th>PRECIO</th>
             <th>ACCIONES</th>
@@ -68,13 +69,26 @@ const messages = await contentRepository.getContactMessages();
         </thead>
         <tbody>
           {workshops.map((w) => (
-            <tr>
+            <tr class={w.published ? '' : styles.rowHidden}>
               <td><Badge variant="pink">{w.code}</Badge></td>
               <td>{w.title}</td>
+              <td>
+                <Badge variant={w.published ? 'lime' : undefined}>
+                  {w.published ? 'PUBLICADO' : 'OCULTO'}
+                </Badge>
+              </td>
               <td>{w.level || 'N/A'}</td>
               <td>${w.price?.toLocaleString('es-CL')} CLP</td>
-              <td>
-                <button class:list={[styles.actionBtn, styles.deleteBtn]} data-delete-id={w.id}>
+              <td style="white-space: nowrap;">
+                <button
+                  type="button"
+                  class:list={[styles.actionBtn, w.published ? styles.unpublishBtn : styles.publishBtn]}
+                  data-toggle-publish-id={w.id}
+                  data-next-published={String(!w.published)}
+                >
+                  {w.published ? 'OCULTAR' : 'PUBLICAR'}
+                </button>
+                <button type="button" class:list={[styles.actionBtn, styles.deleteBtn]} data-delete-id={w.id}>
                   ELIMINAR
                 </button>
               </td>
@@ -94,6 +108,7 @@ const messages = await contentRepository.getContactMessages();
           <tr>
             <th>CÓD</th>
             <th>TÍTULO</th>
+            <th>ESTADO</th>
             <th>TIPO</th>
             <th>DESDE</th>
             <th>ACCIONES</th>
@@ -101,13 +116,26 @@ const messages = await contentRepository.getContactMessages();
         </thead>
         <tbody>
           {services.map((s) => (
-            <tr>
+            <tr class={s.published ? '' : styles.rowHidden}>
               <td><Badge variant="cyan">{s.code}</Badge></td>
               <td>{s.title}</td>
+              <td>
+                <Badge variant={s.published ? 'lime' : undefined}>
+                  {s.published ? 'PUBLICADO' : 'OCULTO'}
+                </Badge>
+              </td>
               <td>{s.serviceType || 'Servicio'}</td>
               <td>${s.startingPrice?.toLocaleString('es-CL')} CLP</td>
-              <td>
-                <button class:list={[styles.actionBtn, styles.deleteBtn]} data-delete-id={s.id}>
+              <td style="white-space: nowrap;">
+                <button
+                  type="button"
+                  class:list={[styles.actionBtn, s.published ? styles.unpublishBtn : styles.publishBtn]}
+                  data-toggle-publish-id={s.id}
+                  data-next-published={String(!s.published)}
+                >
+                  {s.published ? 'OCULTAR' : 'PUBLICAR'}
+                </button>
+                <button type="button" class:list={[styles.actionBtn, styles.deleteBtn]} data-delete-id={s.id}>
                   ELIMINAR
                 </button>
               </td>
@@ -127,18 +155,32 @@ const messages = await contentRepository.getContactMessages();
           <tr>
             <th>CÓD</th>
             <th>TÍTULO</th>
+            <th>ESTADO</th>
             <th>CATEGORÍA</th>
             <th>ACCIONES</th>
           </tr>
         </thead>
         <tbody>
           {projects.map((p) => (
-            <tr>
+            <tr class={p.published ? '' : styles.rowHidden}>
               <td><Badge variant="lime">{p.code}</Badge></td>
               <td>{p.title}</td>
-              <td>{p.projectType || 'DIY'}</td>
               <td>
-                <button class:list={[styles.actionBtn, styles.deleteBtn]} data-delete-id={p.id}>
+                <Badge variant={p.published ? 'lime' : undefined}>
+                  {p.published ? 'PUBLICADO' : 'OCULTO'}
+                </Badge>
+              </td>
+              <td>{p.projectType || 'DIY'}</td>
+              <td style="white-space: nowrap;">
+                <button
+                  type="button"
+                  class:list={[styles.actionBtn, p.published ? styles.unpublishBtn : styles.publishBtn]}
+                  data-toggle-publish-id={p.id}
+                  data-next-published={String(!p.published)}
+                >
+                  {p.published ? 'OCULTAR' : 'PUBLICAR'}
+                </button>
+                <button type="button" class:list={[styles.actionBtn, styles.deleteBtn]} data-delete-id={p.id}>
                   ELIMINAR
                 </button>
               </td>
@@ -221,8 +263,8 @@ const messages = await contentRepository.getContactMessages();
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
         <div>
-          <label style="font-family: var(--font-mono); font-size: 0.8rem; color: #a0a0b5;">URL DE IMAGEN (O CLOUDINARY ID)</label>
-          <input type="url" name="imageUrl" required value="https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=1000&q=80" style="width: 100%; padding: 0.6rem; background: #08080c; border: 1px solid #333; color: #fff;" />
+          <label style="font-family: var(--font-mono); font-size: 0.8rem; color: #a0a0b5;">RUTA LOCAL (/images/...) O URL DE IMAGEN</label>
+          <input type="text" name="imageUrl" required value="/images/placeholder.svg" style="width: 100%; padding: 0.6rem; background: #08080c; border: 1px solid #333; color: #fff;" />
         </div>
         <div>
           <label style="font-family: var(--font-mono); font-size: 0.8rem; color: #a0a0b5;">TEXTO ALT IMAGEN</label>
@@ -235,8 +277,13 @@ const messages = await contentRepository.getContactMessages();
         <input type="text" name="tags" placeholder="Pedales DIY, Delay, PT2399, Audio" style="width: 100%; padding: 0.6rem; background: #08080c; border: 1px solid #333; color: #fff;" />
       </div>
 
+      <label style="display: flex; align-items: center; gap: 0.6rem; font-family: var(--font-mono); font-size: 0.85rem; color: #d6d6e6; cursor: pointer;">
+        <input type="checkbox" name="published" value="true" checked style="width: 1.1rem; height: 1.1rem; accent-color: #39ff14;" />
+        <span>Publicar inmediatamente en el sitio web (desmarca para dejarlo oculto en el CMS)</span>
+      </label>
+
       <Button type="submit" variant="primary" size="md">
-        GUARDAR Y PUBLICAR EN MUMU TECH
+        GUARDAR EN MUMU TECH
       </Button>
     </form>
   </section>
@@ -278,6 +325,28 @@ const messages = await contentRepository.getContactMessages();
       }
     });
   }
+
+  // Toggle publish / unpublish handler (enable or disable item without deleting)
+  document.querySelectorAll('[data-toggle-publish-id]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const id = btn.getAttribute('data-toggle-publish-id');
+      const nextPublished = btn.getAttribute('data-next-published') === 'true';
+      if (!id) return;
+
+      const res = await fetch('/api/content', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ id, published: nextPublished }),
+      });
+
+      if (res.ok) {
+        window.location.reload();
+      } else {
+        alert('No autorizado o error al cambiar el estado de publicación.');
+      }
+    });
+  });
 
   // Delete handler (authenticated automatically via HttpOnly SameSite=Strict cookie)
   document.querySelectorAll('[data-delete-id]').forEach((btn) => {
@@ -322,8 +391,8 @@ const messages = await contentRepository.getContactMessages();
         imageUrl: formData.get('imageUrl'),
         imageAlt: formData.get('imageAlt'),
         tags: tags,
-        featured: true,
-        published: true,
+        featured: formData.get('published') === 'true',
+        published: formData.get('published') === 'true',
       };
 
       try {

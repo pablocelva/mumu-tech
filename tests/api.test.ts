@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { POST as contactHandler } from '../src/pages/api/contact';
 import { POST as authHandler, DELETE as authLogoutHandler } from '../src/pages/api/auth';
-import { GET as contentGetHandler, POST as contentPostHandler, DELETE as contentDeleteHandler } from '../src/pages/api/content';
+import { GET as contentGetHandler, POST as contentPostHandler, PATCH as contentPatchHandler, DELETE as contentDeleteHandler } from '../src/pages/api/content';
 import { contentRepository } from '../src/repositories/content.repository';
 import { authRepository } from '../src/repositories/auth.repository';
 import { ADMIN_COOKIE_NAME, authRateLimiter, contactRateLimiter } from '../src/lib/security';
@@ -219,6 +219,20 @@ describe('API Route Handlers Integration Tests', () => {
 
       const postResponse = await contentPostHandler({ request: postRequest } as any);
       expect(postResponse.status).toBe(201);
+
+      // Toggle published state via PATCH (hide without deleting)
+      const patchRequest = new Request('http://localhost/api/content', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${validToken}`,
+        },
+        body: JSON.stringify({ id: 'api-item-01', published: false }),
+      });
+      const patchResponse = await contentPatchHandler({ request: patchRequest } as any);
+      expect(patchResponse.status).toBe(200);
+      const patchJson = await patchResponse.json();
+      expect(patchJson.data.published).toBe(false);
 
       // Now delete it
       const deleteUrl = new URL('http://localhost/api/content?id=api-item-01');

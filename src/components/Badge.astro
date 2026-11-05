@@ -4,11 +4,32 @@ import styles from './Badge.module.css';
 interface Props {
   variant?: 'default' | 'pink' | 'cyan' | 'lime' | 'purple';
   class?: string;
+  filterTag?: string;
+  filterReset?: boolean;
 }
 
-const { variant = 'default', class: className = '' } = Astro.props;
+const {
+  variant = 'default',
+  class: className = '',
+  filterTag,
+  filterReset = false,
+} = Astro.props;
+
+const isInteractive = Boolean(filterTag || filterReset);
 ---
 
-<span class:list={[styles.badge, styles[variant], className]}>
-  <slot />
-</span>
+{isInteractive ? (
+  <button
+    type="button"
+    class:list={[styles.badge, styles.interactive, styles[variant], className]}
+    data-filter-tag={filterTag}
+    data-filter-reset={filterReset ? 'true' : undefined}
+    aria-pressed={filterReset ? 'true' : 'false'}
+  >
+    <slot />
+  </button>
+) : (
+  <span class:list={[styles.badge, styles[variant], className]}>
+    <slot />
+  </span>
+)}

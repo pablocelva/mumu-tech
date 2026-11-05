@@ -10,6 +10,7 @@ Esta guía documenta las decisiones técnicas, comparativas de servicios y la es
 3. [Estrategia de UI & Branding para Correos](#3-estrategia-de-ui--branding-para-correos)
 4. [Arquitectura de Implementación en Astro](#4-arquitectura-de-implementación-en-astro)
 5. [Guía Práctica para el Cliente](#5-guía-práctica-para-el-cliente)
+6. [Recordatorio Automático 1 Semana Antes del Taller & Resend Audiences](#6-recordatorio-automático-1-semana-antes-del-taller--resend-audiences)
 
 ---
 
@@ -130,3 +131,42 @@ Para que el dueño de Mumu Tech envíe sus newsletters sin riesgo de romper el d
    - Reemplazar los textos del nuevo taller o fotos del proyecto.
    - Enviar correo de prueba para verificar visualización.
 3. **Envío**: Programar o hacer clic en **"Enviar a toda la lista"**.
+
+
+---
+
+## 6. Recordatorio Automático 1 Semana Antes del Taller & Resend Audiences
+
+En las páginas dedicadas de cada taller (`/educativa/[slug]`), el participante se inscribe con **Nombre (obligatorio)**, **Teléfono (obligatorio)**, **Fecha seleccionada (obligatorio)** y **Correo electrónico (opcional)**.
+
+### A. ¿Cómo funciona el recordatorio 1 semana antes en Resend?
+
+La API de envíos de **Resend** incluye el parámetro nativo `scheduled_at` (`scheduledAt` en el SDK), con las siguientes reglas técnicas oficiales:
+- **Formato soportado**: ISO 8601 (`2026-11-14T10:00:00.000Z`).
+- **Ventana máxima de programación nativa**: **Hasta 30 días en el futuro** desde el momento de la petición API.
+- **Restricciones de `scheduled_at`**: No admite archivos adjuntos ni el endpoint `/emails/batch`, pero sí HTML completo con branding y permite cancelar o reprogramar un envío con su `email_id` (`POST /emails/:id/cancel` o `PATCH /emails/:id`).
+
+#### Estrategia Híbrida implementada en `src/lib/workshop-reminders.ts`
+`calculateReminderSchedule(workshopIsoDate, hasEmail)` clasifica cada inscripción en 4 estados determinísticos guardados en `workshop_registrations`:
+
+1. **`skipped_no_email`**: El usuario solo dejó su teléfono/WhatsApp (ya que el correo es opcional). Se notifica al administrador para seguimiento por WhatsApp.
+2. **`scheduled_resend` (0 < faltan <= 29.9 días para `fechaTaller - 7 días`)**:
+   - Caso más frecuente (inscripciones realizadas hasta ~37 días antes de la fecha del taller).
+   - `POST /api/workshop-register` dispara de inmediato dos llamadas a Resend:
+     1. Confirmación instantánea al inscrito.
+     2. Correo recordatorio con `scheduled_at = (fechaTaller - 7 días)` **sin requerir servidores cron externos**.
+3. **`queued_for_cron` (faltan > 30 días para `fechaTaller - 7 días`)**:
+   - Cuando se abren fechas con 2 o 3 meses de anticipación, `scheduled_at` superaría el tope de 30 días de Resend.
+   - La inscripción queda persistida en Supabase (`reminderStatus = 'queued_for_cron'`, `reminderScheduledAt = ISO`).
+   - Una **Netlify Scheduled Function** diaria (`@netlify/functions` con `schedule = "@daily"`) o `pg_cron` en Supabase consulta los registros con `reminderStatus = 'queued_for_cron'` cuya fecha `reminderScheduledAt` ya entró en los próximos 7–15 días, los programa en Resend y actualiza el estado a `scheduled_resend`.
+4. **`too_close_for_7d_reminder` (inscripción a menos de 7 días del taller)**:
+   - No agenda un recordatorio en el pasado; el inscrito recibe directamente su correo de confirmación con todas las coordenadas de llegada.
+
+### B. ¿Se puede hacer también el Newsletter todo-en-uno dentro de Resend?
+
+Sí. Además de Brevo/MailerLite, **Resend ofrece "Audiences & Broadcasts"**:
+- **Sincronización automática ya cableada**: Si configuras `RESEND_API_KEY` y `RESEND_AUDIENCE_ID` en las variables de entorno, `dispatchWorkshopEmailsAndNewsletter()` agrega automáticamente el contacto vía `POST https://api.resend.com/audiences/{audienceId}/contacts` cuando el usuario ingresa su correo y deja marcada la casilla de novedades.
+- **Broadcasts (Campañas)**: Desde el panel web de Resend, el cliente puede redactar campañas visuales o con plantilla HTML maestra usando la variable obligatoria `{{{RESEND_UNSUBSCRIBE_URL}}}` para baja en 1 clic.
+- **¿Cuándo elegir Resend Broadcasts vs. Brevo?**
+  - **Resend Todo-en-Uno**: Ideal al comenzar (hasta **1.000 contactos gratuitos** en Audiences) para tener transaccionales, recordatorios programados y boletines bajo una sola cuenta y un mismo dominio verificado.
+  - **Brevo**: Ideal si la lista supera los 1.000 suscriptores y se desea mantener costo \$0 con contactos ilimitados (hasta 300 envíos/día).

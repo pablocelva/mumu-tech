@@ -12,10 +12,19 @@ describe('ContentRepository Unit Tests', () => {
     expect(items.length).toBeGreaterThanOrEqual(9);
   });
 
-  it('should filter items correctly by category', async () => {
+  it('should filter items correctly by category (only published items)', async () => {
     const workshops = await contentRepository.getItemsByCategory('educativa');
-    expect(workshops.length).toBeGreaterThanOrEqual(3);
-    workshops.forEach((item) => expect(item.category).toBe('educativa'));
+    expect(workshops.length).toBe(2);
+    workshops.forEach((item) => {
+      expect(item.category).toBe('educativa');
+      expect(item.published).toBe(true);
+    });
+
+    const allWorkshops = (await contentRepository.getAllItems()).filter(
+      (i) => i.category === 'educativa'
+    );
+    expect(allWorkshops.length).toBe(5);
+    expect(allWorkshops.filter((i) => !i.published).length).toBe(3);
 
     const services = await contentRepository.getItemsByCategory('servicios');
     expect(services.length).toBeGreaterThanOrEqual(3);
@@ -35,10 +44,22 @@ describe('ContentRepository Unit Tests', () => {
     });
   });
 
-  it('should find an item by its slug', async () => {
-    const item = await contentRepository.getItemBySlug('construccion-pedal-fuzz-germanio');
-    expect(item).not.toBeNull();
-    expect(item?.code).toBe('001');
+  it('should find an item by its slug and toggle published state without deleting it', async () => {
+    const publicWorkshop = await contentRepository.getItemBySlug('taller-inicial-fabricacion-pedales');
+    expect(publicWorkshop).not.toBeNull();
+    expect(publicWorkshop?.code).toBe('001');
+    expect(publicWorkshop?.published).toBe(true);
+
+    const disabledWorkshop = await contentRepository.getItemBySlug('construccion-pedal-fuzz-germanio');
+    expect(disabledWorkshop).not.toBeNull();
+    expect(disabledWorkshop?.code).toBe('101');
+    expect(disabledWorkshop?.published).toBe(false);
+
+    const reEnabled = await contentRepository.setItemPublished('ws-001', true);
+    expect(reEnabled?.published).toBe(true);
+
+    const missingToggle = await contentRepository.setItemPublished('non-existent-id', false);
+    expect(missingToggle).toBeNull();
 
     const notFound = await contentRepository.getItemBySlug('non-existent-slug-xyz');
     expect(notFound).toBeNull();

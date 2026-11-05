@@ -1,0 +1,237 @@
+.pageWrapper {
+  padding-top: 1.5rem;
+  padding-bottom: 4.5rem;
+}
+
+.backLinkRow {
+  margin-bottom: 1.5rem;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--color-accent-cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.35rem 0;
+}
+
+.backLink:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+/* Row 1 of Wireframe: Left = Registration Form, Right = Workshop Info (aligned equal height & 50/50 split) */
+.heroSplitGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2rem;
+  align-items: stretch;
+}
+
+.formColumn {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+}
+
+.infoColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  background: rgba(18, 18, 26, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  padding: 2rem;
+  border-radius: 2px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  min-width: 0;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.mobileRegisterBar {
+  display: none;
+}
+
+@media (max-width: 960px) {
+  .heroSplitGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .formColumn {
+    display: none;
+  }
+
+  .infoColumn {
+    padding: 1.35rem;
+  }
+
+  .mobileRegisterBar {
+    display: block;
+  }
+}
+
+.coverFrame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 2px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: #0a0a0f;
+}
+
+.coverImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.codePill {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  background: rgba(9, 9, 14, 0.88);
+  border: 1px solid var(--color-accent-cyan);
+  color: var(--color-accent-cyan);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  border-radius: 2px;
+}
+
+.titleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: clamp(1.55rem, 3vw, 2.2rem);
+  line-height: 1.15;
+  letter-spacing: 0.03em;
+  color: #ffffff;
+  text-transform: uppercase;
+}
+
+.specsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.specBadge {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  padding: 0.3rem 0.65rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #e4e4f2;
+  border-radius: 2px;
+}
+
+.specPrice {
+  background: rgba(57, 255, 20, 0.12);
+  border-color: var(--color-accent-lime);
+  color: #9cff89;
+  font-weight: 700;
+}
+
+.descriptionText {
+  font-size: 0.98rem;
+  color: var(--color-text-muted);
+  line-height: 1.7;
+}
+
+/* Mobile & Tablet Registration Modal (<dialog>) */
+.regDialog {
+  margin: auto;
+  width: min(94vw, 520px);
+  max-height: 90vh;
+  background: #13131c;
+  color: #f2f2f8;
+  border: 1px solid rgba(0, 240, 255, 0.4);
+  border-radius: 2px;
+  padding: 0;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.88);
+}
+
+.regDialog:modal {
+  overscroll-behavior: contain;
+}
+
+.regDialog::backdrop {
+  background: rgba(6, 6, 11, 0.82);
+  backdrop-filter: blur(6px);
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+
+.regDialogInner {
+  padding: 1.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.regDialogHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  padding-bottom: 0.85rem;
+}
+
+.regDialogBadge {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--color-accent-cyan);
+  text-transform: uppercase;
+}
+
+.regDialogTitle {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  color: #ffffff;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+.regDialogClose {
+  min-width: 44px;
+  min-height: 44px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  color: #ffffff;
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.regDialogClose:hover {
+  border-color: var(--color-accent-pink);
+  color: var(--color-accent-pink);
+}
+
+.notFoundBox {
+  background: rgba(18, 18, 26, 0.9);
+  border: 1px solid rgba(255, 42, 133, 0.4);
+  padding: 2.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+

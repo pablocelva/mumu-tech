@@ -1,5 +1,6 @@
 /* Global Reset and Retro Lofi Palette for Mumu Tech */
 :root {
+  color-scheme: dark;
   --color-bg: #0d0d11;
   --color-bg-translucent: rgba(13, 13, 17, 0.75);
   --color-bg-card: rgba(22, 22, 30, 0.85);

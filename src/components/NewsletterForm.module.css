@@ -1,4 +1,5 @@
 .card {
+  width: 100%;
   background: rgba(18, 18, 26, 0.88);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);

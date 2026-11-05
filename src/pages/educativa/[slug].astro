@@ -1,0 +1,205 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Button from '../../components/Button.astro';
+import WorkshopRegistrationForm from '../../components/workshop/WorkshopRegistrationForm.astro';
+import WorkshopCurriculum from '../../components/workshop/WorkshopCurriculum.astro';
+import WorkshopAudioDemos from '../../components/workshop/WorkshopAudioDemos.astro';
+import WorkshopEditionsGallery from '../../components/workshop/WorkshopEditionsGallery.astro';
+import { contentRepository } from '../../repositories/content.repository';
+import { getOptimizedImageUrl, DEFAULT_PLACEHOLDER_IMAGE } from '../../lib/cloudinary';
+import type { WorkshopItem } from '../../types';
+import styles from '../../styles/WorkshopDetail.module.css';
+
+export const prerender = false;
+
+const { slug = '' } = Astro.params;
+const foundItem = slug ? await contentRepository.getItemBySlug(slug) : null;
+const workshop =
+  foundItem && foundItem.category === 'educativa' && foundItem.published
+    ? (foundItem as WorkshopItem)
+    : null;
+
+if (!workshop) {
+  Astro.response.status = 404;
+}
+
+const heroImg = workshop
+  ? getOptimizedImageUrl(workshop.imageUrl, { width: 1000, crop: 'fill' })
+  : DEFAULT_PLACEHOLDER_IMAGE;
+
+const formattedPrice =
+  workshop?.price !== undefined
+    ? `$${workshop.price.toLocaleString('es-CL')} CLP`
+    : 'Consultar valor';
+---
+
+<Layout
+  title={workshop ? `${workshop.title} | Talleres Mumu Tech` : 'Taller no encontrado | Mumu Tech'}
+  description={workshop ? workshop.summary : 'El taller solicitado no se encuentra disponible.'}
+  image={workshop ? heroImg : undefined}
+>
+  <div class={`container ${styles.pageWrapper}`}>
+    <div class={styles.backLinkRow}>
+      <a href="/educativa" class={styles.backLink}>
+        ← VOLVER A TALLERES EDUCATIVOS
+      </a>
+    </div>
+
+    {!workshop ? (
+      <section class={styles.notFoundBox} aria-labelledby="not-found-title">
+        <h1 id="not-found-title" class={styles.title}>
+          [ 404 · TALLER NO ENCONTRADO ]
+        </h1>
+        <p class={styles.descriptionText}>
+          El taller que buscas no existe o su convocatoria no está publicada actualmente.
+        </p>
+        <Button href="/educativa" variant="primary">
+          VER TODOS LOS TALLERES DISPONIBLES
+        </Button>
+      </section>
+    ) : (
+      <>
+        {/* Bloque Superior del Wireframe: Formulario (Izquierda Desktop) + Info del Taller (Derecha Desktop) */}
+        <div class={styles.heroSplitGrid}>
+          <aside class={styles.formColumn} aria-label="Formulario de inscripción al taller">
+            <WorkshopRegistrationForm workshop={workshop} instanceId="desktop" />
+          </aside>
+
+          <article class={styles.infoColumn}>
+            <div class={styles.coverFrame}>
+              <img
+                src={heroImg}
+                alt={workshop.imageAlt}
+                class={styles.coverImg}
+                fetchpriority="high"
+                width="960"
+                height="540"
+                onerror={`this.onerror=null;this.src='${DEFAULT_PLACEHOLDER_IMAGE}';`}
+              />
+              <span class={styles.codePill}>TALLER #{workshop.code}</span>
+            </div>
+
+            <div class={styles.titleBlock}>
+              <h1 class={styles.title}>{workshop.title}</h1>
+              <div class={styles.specsRow}>
+                <span class={`${styles.specBadge} ${styles.specPrice}`}>{formattedPrice}</span>
+                {workshop.durationHours && (
+                  <span class={styles.specBadge}>⏱ {workshop.durationHours} HORAS</span>
+                )}
+                {workshop.level && (
+                  <span class={styles.specBadge}>⚡ NIVEL: {workshop.level.toUpperCase()}</span>
+                )}
+                {workshop.spotsLimit && (
+                  <span class={styles.specBadge}>👥 MÁX. {workshop.spotsLimit} CUPOS</span>
+                )}
+                {workshop.materialsIncluded && (
+                  <span class={styles.specBadge}>🔧 MATERIALES INCLUIDOS</span>
+                )}
+              </div>
+            </div>
+
+            {/* Botón de Inscripción Mobile & Tablet que abre el modal <dialog> */}
+            <div class={styles.mobileRegisterBar}>
+              <Button
+                type="button"
+                variant="primary"
+                size="lg"
+                fullWidth
+                id="open-mobile-reg-modal"
+              >
+                INSCRIBIRME A ESTE TALLER
+              </Button>
+            </div>
+
+            <p class={styles.descriptionText}>{workshop.description}</p>
+          </article>
+        </div>
+
+        {/* Componente dedicado en 2 columnas (Desktop) / 1 columna (Tablet & Mobile): Programa por Etapas + Aprendizajes */}
+        <WorkshopCurriculum
+          stages={workshop.stages}
+          learningOutcomes={workshop.learningOutcomes}
+        />
+
+        {/* Bloque Medio del Wireframe: 3 Barras de Demos de Audio / Web Audio API / Samply */}
+        <WorkshopAudioDemos
+          demos={workshop.audioDemos}
+          samplyPlaylistUrl={workshop.samplyPlaylistUrl}
+          workshopTitle={workshop.title}
+        />
+
+        {/* Bloque Inferior del Wireframe: Grilla 3x2 Navegable de Ediciones Anteriores */}
+        <WorkshopEditionsGallery editions={workshop.pastEditions} />
+
+        {/* Modal Formulario de Inscripción para Mobile & Tablet */}
+        <dialog
+          id="mobile-registration-modal"
+          class={styles.regDialog}
+          closedby="any"
+          aria-labelledby="mobile-reg-modal-title"
+        >
+          <div class={styles.regDialogInner}>
+            <div class={styles.regDialogHeader}>
+              <div>
+                <span class={styles.regDialogBadge}>[ RESERVAR BANCO DE TRABAJO ]</span>
+                <h2 id="mobile-reg-modal-title" class={styles.regDialogTitle}>
+                  {workshop.title}
+                </h2>
+              </div>
+              <form method="dialog">
+                <button
+                  type="submit"
+                  value="close"
+                  class={styles.regDialogClose}
+                  aria-label="Cerrar formulario de inscripción"
+                >
+                  ✕
+                </button>
+              </form>
+            </div>
+
+            <WorkshopRegistrationForm
+              workshop={workshop}
+              instanceId="modal"
+              inModal={true}
+            />
+          </div>
+        </dialog>
+      </>
+    )}
+  </div>
+</Layout>
+
+<script>
+  const openBtn = document.getElementById('open-mobile-reg-modal');
+  const regDialog = document.getElementById(
+    'mobile-registration-modal'
+  ) as HTMLDialogElement | null;
+
+  if (openBtn && regDialog) {
+    openBtn.addEventListener('click', () => {
+      regDialog.showModal();
+    });
+
+    regDialog.addEventListener('close', () => {
+      regDialog.returnValue = '';
+    });
+
+    // Fallback obligatorio para light-dismiss en navegadores sin soporte de <dialog closedby="any">
+    if (!('closedBy' in HTMLDialogElement.prototype)) {
+      regDialog.addEventListener('click', (event) => {
+        if (event.target !== regDialog) return;
+        const rect = regDialog.getBoundingClientRect();
+        const inside =
+          rect.top <= event.clientY &&
+          event.clientY <= rect.top + rect.height &&
+          rect.left <= event.clientX &&
+          event.clientX <= rect.left + rect.width;
+        if (!inside) {
+          regDialog.close();
+        }
+      });
+    }
+  }
+</script>
+

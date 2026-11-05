@@ -1,9 +1,16 @@
 ---
 import styles from './NewsletterForm.module.css';
 import Button from './Button.astro';
+
+interface Props {
+  idPrefix?: string;
+  class?: string;
+}
+
+const { idPrefix = 'newsletter', class: className = '' } = Astro.props;
 ---
 
-<div class={styles.card}>
+<div class:list={[styles.card, className]} data-newsletter-root>
   <div class={styles.header}>
     <span class={styles.badge}>[ MAILING LIST & NOVEDADES ]</span>
     <h2 class={styles.title}>SUSCRÍBETE A NOVEDADES Y TALLERES</h2>
@@ -12,104 +19,115 @@ import Button from './Button.astro';
     </p>
   </div>
 
-  <form id="newsletter-form" class={styles.form} novalidate>
+  <form id={`${idPrefix}-form`} class={styles.form} data-newsletter-form novalidate>
     <div class="sr-only" aria-hidden="true">
-      <label for="newsletter-website">Sitio web (dejar en blanco)</label>
-      <input type="text" id="newsletter-website" name="website" tabindex="-1" autocomplete="off" />
+      <label for={`${idPrefix}-website`}>Sitio web (dejar en blanco)</label>
+      <input type="text" id={`${idPrefix}-website`} name="website" tabindex="-1" autocomplete="off" />
     </div>
 
     <div class={styles.inputWrapper}>
+      <label for={`${idPrefix}-email`} class="sr-only">
+        Correo electrónico para suscripción al newsletter
+      </label>
       <svg class={styles.icon} viewBox="0 0 24 24" aria-hidden="true">
         <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
       </svg>
       <input
         type="email"
-        id="newsletter-email"
+        id={`${idPrefix}-email`}
         name="email"
         required
+        inputmode="email"
         placeholder="tu-correo@ejemplo.com"
         class={styles.input}
         autocomplete="email"
-        aria-label="Correo electrónico para suscripción al newsletter"
       />
     </div>
 
-    <Button type="submit" variant="accentPink" size="md" id="newsletter-submit-btn">
+    <Button type="submit" variant="accentPink" size="md" id={`${idPrefix}-submit-btn`}>
       SUSCRIBIRME
     </Button>
   </form>
 
   <div
-    id="newsletter-status"
+    id={`${idPrefix}-status`}
     class={styles.statusMessage}
+    data-newsletter-status
     data-base-class={styles.statusMessage}
     data-success-class={styles.statusSuccess}
     data-error-class={styles.statusError}
-    role="alert"
+    role="status"
     aria-live="polite"
   ></div>
 </div>
 
 <script>
-  function setupNewsletterForm() {
-    const form = document.getElementById('newsletter-form') as HTMLFormElement | null;
-    const statusDiv = document.getElementById('newsletter-status');
-    const submitBtn = document.getElementById('newsletter-submit-btn');
+  function setupNewsletterForms() {
+    const roots = document.querySelectorAll<HTMLElement>('[data-newsletter-root]');
 
-    if (!form || !statusDiv || !submitBtn) return;
+    roots.forEach((root) => {
+      if (root.dataset.newsletterBound === 'true') return;
+      root.dataset.newsletterBound = 'true';
 
-    const baseClass = statusDiv.getAttribute('data-base-class') || '';
-    const successClass = statusDiv.getAttribute('data-success-class') || '';
-    const errorClass = statusDiv.getAttribute('data-error-class') || '';
+      const form = root.querySelector<HTMLFormElement>('[data-newsletter-form]');
+      const statusDiv = root.querySelector<HTMLElement>('[data-newsletter-status]');
+      const submitBtn = form?.querySelector<HTMLButtonElement>('button[type="submit"]');
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
+      if (!form || !statusDiv || !submitBtn) return;
 
-      if (!form.checkValidity()) {
-        form.reportValidity();
-        return;
-      }
+      const baseClass = statusDiv.getAttribute('data-base-class') || '';
+      const successClass = statusDiv.getAttribute('data-success-class') || '';
+      const errorClass = statusDiv.getAttribute('data-error-class') || '';
 
-      submitBtn.setAttribute('disabled', 'true');
-      const originalText = submitBtn.textContent;
-      submitBtn.textContent = 'PROCESANDO...';
-      statusDiv.className = baseClass;
-      statusDiv.style.display = 'none';
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-      const formData = new FormData(form);
-      const email = formData.get('email');
-      const website = formData.get('website') || '';
+        if (!form.checkValidity()) {
+          form.reportValidity();
+          return;
+        }
 
-      try {
-        const res = await fetch('/api/contact', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, website }),
-        });
+        submitBtn.disabled = true;
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'PROCESANDO...';
+        statusDiv.className = baseClass;
+        statusDiv.style.display = 'none';
 
-        const result = await res.json();
+        const formData = new FormData(form);
+        const email = formData.get('email');
+        const website = formData.get('website') || '';
 
-        if (res.ok && result.success) {
-          statusDiv.className = `${baseClass} ${successClass}`;
-          statusDiv.style.display = 'block';
-          statusDiv.textContent = '✓ ' + (result.message || '¡Te has suscrito con éxito al mailing list!');
-          form.reset();
-        } else {
+        try {
+          const res = await fetch('/api/contact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, website }),
+          });
+
+          const result = await res.json();
+
+          if (res.ok && result.success) {
+            statusDiv.className = `${baseClass} ${successClass}`;
+            statusDiv.style.display = 'block';
+            statusDiv.textContent = '✓ ' + (result.message || '¡Te has suscrito con éxito al mailing list!');
+            form.reset();
+          } else {
+            statusDiv.className = `${baseClass} ${errorClass}`;
+            statusDiv.style.display = 'block';
+            statusDiv.textContent = '⚠ ' + (result.error || 'Ingresa un correo válido.');
+          }
+        } catch {
           statusDiv.className = `${baseClass} ${errorClass}`;
           statusDiv.style.display = 'block';
-          statusDiv.textContent = '⚠ ' + (result.error || 'Ingresa un correo válido.');
+          statusDiv.textContent = '⚠ Error de conexión. Intenta nuevamente.';
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText || 'SUSCRIBIRME';
         }
-      } catch {
-        statusDiv.className = `${baseClass} ${errorClass}`;
-        statusDiv.style.display = 'block';
-        statusDiv.textContent = '⚠ Error de conexión. Intenta nuevamente.';
-      } finally {
-        submitBtn.removeAttribute('disabled');
-        submitBtn.textContent = originalText || 'SUSCRIBIRME';
-      }
+      });
     });
   }
 
-  setupNewsletterForm();
-  document.addEventListener('astro:after-swap', setupNewsletterForm);
+  setupNewsletterForms();
+  document.addEventListener('astro:after-swap', setupNewsletterForms);
 </script>

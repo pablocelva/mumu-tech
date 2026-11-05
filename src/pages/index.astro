@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import SectionHeader from '../components/SectionHeader.astro';
 import Button from '../components/Button.astro';
 import Badge from '../components/Badge.astro';
+import NewsletterForm from '../components/NewsletterForm.astro';
 import { contentRepository } from '../repositories/content.repository';
 
 const featuredWorkshops = await contentRepository.getItemsByCategory('educativa');
@@ -139,6 +140,11 @@ const sectionsOverview = [
         </Button>
       </div>
     </section>
+
+    <!-- Newsletter Banner (Same width as Contact Banner) -->
+    <div style="margin-top: 2rem; width: 100%;">
+      <NewsletterForm idPrefix="home-newsletter" />
+    </div>
 
   </div>
 </Layout>

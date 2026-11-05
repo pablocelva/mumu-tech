@@ -143,6 +143,39 @@ describe('Supabase Client and Repository Online Integration Tests', () => {
       expect(typeof res).toBe('boolean');
     });
 
+    it('should toggle published status in Supabase when configured', async () => {
+      const eqMock = vi.fn().mockResolvedValue({ error: null });
+      const updateMock = vi.fn().mockReturnValue({ eq: eqMock });
+      const mockSupabase = {
+        from: vi.fn().mockReturnValue({
+          update: updateMock,
+        }),
+      };
+
+      vi.spyOn(supabaseLib, 'isSupabaseConfigured').mockReturnValue(true);
+      supabaseLib.setSupabaseClient(mockSupabase as any);
+
+      const updated = await contentRepository.setItemPublished(INITIAL_WORKSHOPS[2].id, true);
+      expect(updated?.published).toBe(true);
+      expect(eqMock).toHaveBeenCalledWith('id', INITIAL_WORKSHOPS[2].id);
+    });
+
+    it('should handle supabase publish toggle error gracefully', async () => {
+      const eqMock = vi.fn().mockRejectedValue(new Error('Update error'));
+      const updateMock = vi.fn().mockReturnValue({ eq: eqMock });
+      const mockSupabase = {
+        from: vi.fn().mockReturnValue({
+          update: updateMock,
+        }),
+      };
+
+      vi.spyOn(supabaseLib, 'isSupabaseConfigured').mockReturnValue(true);
+      supabaseLib.setSupabaseClient(mockSupabase as any);
+
+      const updated = await contentRepository.setItemPublished(INITIAL_WORKSHOPS[2].id, false);
+      expect(updated?.published).toBe(false);
+    });
+
     it('should save and fetch contact messages via Supabase', async () => {
       const insertMock = vi.fn().mockResolvedValue({ error: null });
       const orderMock = vi.fn().mockResolvedValue({

@@ -1,0 +1,338 @@
+---
+import type { WorkshopAudioDemo } from '../../types';
+import styles from './WorkshopAudioDemos.module.css';
+
+interface Props {
+  demos?: WorkshopAudioDemo[];
+  samplyPlaylistUrl?: string;
+  workshopTitle: string;
+}
+
+const { demos = [], samplyPlaylistUrl, workshopTitle } = Astro.props;
+---
+
+{(demos.length > 0 || samplyPlaylistUrl) && (
+  <section class={styles.section} aria-labelledby="audio-demos-heading">
+    <div class={styles.headerRow}>
+      <div>
+        <p class={styles.kicker}>[ PRUEBAS SONORAS DEL CIRCUITO ]</p>
+        <h2 id="audio-demos-heading" class={styles.heading}>
+          DEMOS DE AUDIO &amp; SEÑAL
+        </h2>
+      </div>
+    </div>
+
+    {demos.length > 0 && (
+      <div class={styles.barsGrid} data-audio-demos-root>
+        {demos.map((demo) => (
+          <article
+            class={styles.demoBar}
+            data-demo-card
+            data-active-class={styles.demoBarActive}
+          >
+            <div class={styles.barTop}>
+              <button
+                type="button"
+                class={styles.playBtn}
+                data-demo-btn
+                data-audio-url={demo.audioUrl || ''}
+                data-synth-preset={demo.synthPreset || 'clean-bypass'}
+                aria-pressed="false"
+                aria-label={`Reproducir demo ${demo.title}`}
+              >
+                <span data-btn-icon aria-hidden="true">▶</span>
+              </button>
+              <div class={styles.meta}>
+                <h3 class={styles.demoTitle}>{demo.title}</h3>
+                {demo.subtitle && <p class={styles.demoSubtitle}>{demo.subtitle}</p>}
+              </div>
+            </div>
+
+            <div class={styles.waveRow}>
+              <div class={styles.progressTrack} aria-hidden="true">
+                <div class={styles.progressFill} data-demo-progress></div>
+              </div>
+              <span class={styles.durationLabel} data-demo-time>
+                {demo.durationLabel || '0:06'}
+              </span>
+            </div>
+
+            {demo.audioUrl && (
+              <audio preload="none" src={demo.audioUrl} data-native-audio></audio>
+            )}
+          </article>
+        ))}
+      </div>
+    )}
+
+    {samplyPlaylistUrl && (
+      <div class={styles.samplyWrapper}>
+        <iframe
+          src={samplyPlaylistUrl}
+          title={`Playlist de audio de ${workshopTitle}`}
+          class={styles.samplyFrame}
+          loading="lazy"
+          allow="autoplay; encrypted-media"
+          sandbox="allow-scripts allow-same-origin allow-popups"
+        ></iframe>
+      </div>
+    )}
+  </section>
+)}
+
+<script>
+  // Motor ligero Web Audio API + soporte <audio> nativo para demos comparativas de pedales/sintes
+  let audioCtx: AudioContext | null = null;
+  let activeCleanup: (() => void) | null = null;
+  let activeButton: HTMLButtonElement | null = null;
+
+  function makeDistortionCurve(amount: number, asymmetric = false): Float32Array<ArrayBuffer> {
+    const samples = 44100;
+    const buffer = new ArrayBuffer(samples * 4);
+    const curve = new Float32Array(buffer);
+    for (let i = 0; i < samples; i++) {
+      const x = (i * 2) / samples - 1;
+      if (asymmetric && x < 0) {
+        curve[i] = Math.tanh(x * amount * 0.45) * 0.65;
+      } else {
+        curve[i] = Math.tanh(x * amount);
+      }
+    }
+    return curve;
+  }
+
+  function playSynthPreset(
+    preset: string,
+    onProgress: (pct: number) => void,
+    onEnded: () => void
+  ): () => void {
+    const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (!audioCtx) {
+      audioCtx = new Ctx();
+    }
+    if (audioCtx.state === 'suspended') {
+      void audioCtx.resume();
+    }
+
+    const ctx = audioCtx;
+    const durationSec = 6.0;
+    const startTime = ctx.currentTime;
+    const master = ctx.createGain();
+    master.gain.setValueAtTime(0.18, startTime);
+    master.gain.exponentialRampToValueAtTime(0.001, startTime + durationSec);
+    master.connect(ctx.destination);
+
+    const stoppables: AudioScheduledSourceNode[] = [];
+
+    if (preset === 'clean-bypass' || preset === 'fuzz-germanium' || preset === 'fuzz-gated') {
+      const notes = [110, 130.81, 146.83, 164.81, 146.83, 130.81, 196.0, 164.81];
+      const shaper = ctx.createWaveShaper();
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+
+      if (preset === 'clean-bypass') {
+        shaper.curve = makeDistortionCurve(1.1);
+        filter.frequency.value = 3400;
+      } else if (preset === 'fuzz-germanium') {
+        shaper.curve = makeDistortionCurve(14, true);
+        filter.frequency.value = 2100;
+      } else {
+        shaper.curve = makeDistortionCurve(38, true);
+        filter.frequency.value = 1650;
+      }
+
+      shaper.connect(filter);
+      filter.connect(master);
+
+      notes.forEach((freq, idx) => {
+        const t0 = startTime + idx * 0.72;
+        const osc = ctx.createOscillator();
+        const env = ctx.createGain();
+        osc.type = preset === 'fuzz-gated' ? 'sawtooth' : 'triangle';
+        osc.frequency.setValueAtTime(freq, t0);
+        env.gain.setValueAtTime(0.001, t0);
+        env.gain.linearRampToValueAtTime(0.85, t0 + 0.03);
+        env.gain.exponentialRampToValueAtTime(
+          preset === 'fuzz-gated' ? 0.0008 : 0.08,
+          t0 + (preset === 'fuzz-gated' ? 0.42 : 0.68)
+        );
+        osc.connect(env);
+        env.connect(shaper);
+        osc.start(t0);
+        osc.stop(t0 + 0.7);
+        stoppables.push(osc);
+      });
+    } else if (preset.startsWith('cmos-')) {
+      const baseFreqs = [98, 146.8, 196.5, 293.6, 392.4, 523.2];
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(preset === 'cmos-sag' ? 1200 : 2200, startTime);
+      filter.connect(master);
+
+      const lfo = ctx.createOscillator();
+      const lfoGain = ctx.createGain();
+      lfo.type = 'square';
+      lfo.frequency.setValueAtTime(preset === 'cmos-crossmod' ? 6.5 : 1.8, startTime);
+      lfoGain.gain.setValueAtTime(preset === 'cmos-chord' ? 2 : 38, startTime);
+      lfo.connect(lfoGain);
+      lfo.start(startTime);
+      lfo.stop(startTime + durationSec);
+      stoppables.push(lfo);
+
+      baseFreqs.forEach((f, idx) => {
+        const osc = ctx.createOscillator();
+        const voiceGain = ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(f + idx * 0.9, startTime);
+        if (preset === 'cmos-sag') {
+          osc.frequency.exponentialRampToValueAtTime(f * 0.42, startTime + durationSec * 0.85);
+        }
+        if (idx % 2 === 0) {
+          lfoGain.connect(osc.frequency);
+        }
+        voiceGain.gain.setValueAtTime(0.14, startTime);
+        osc.connect(voiceGain);
+        voiceGain.connect(filter);
+        osc.start(startTime);
+        osc.stop(startTime + durationSec);
+        stoppables.push(osc);
+      });
+    } else {
+      // Diagnóstico y soldadura: hum-fault | sine-clean | shielded-clean
+      const osc = ctx.createOscillator();
+      osc.type = preset === 'hum-fault' ? 'sawtooth' : 'sine';
+      osc.frequency.setValueAtTime(
+        preset === 'hum-fault' ? 50 : preset === 'sine-clean' ? 440 : 220,
+        startTime
+      );
+      osc.connect(master);
+      osc.start(startTime);
+      osc.stop(startTime + durationSec);
+      stoppables.push(osc);
+
+      if (preset === 'shielded-clean') {
+        const fifth = ctx.createOscillator();
+        fifth.type = 'triangle';
+        fifth.frequency.setValueAtTime(329.63, startTime);
+        fifth.connect(master);
+        fifth.start(startTime);
+        fifth.stop(startTime + durationSec);
+        stoppables.push(fifth);
+      }
+    }
+
+    let stopped = false;
+    let rafId = 0;
+
+    const tick = () => {
+      if (stopped) return;
+      const elapsed = ctx.currentTime - startTime;
+      const pct = Math.min(100, (elapsed / durationSec) * 100);
+      onProgress(pct);
+      if (elapsed >= durationSec) {
+        stopped = true;
+        onEnded();
+        return;
+      }
+      rafId = requestAnimationFrame(tick);
+    };
+    rafId = requestAnimationFrame(tick);
+
+    return () => {
+      stopped = true;
+      cancelAnimationFrame(rafId);
+      stoppables.forEach((node) => {
+        try {
+          node.stop();
+        } catch {
+          // ignore already stopped
+        }
+      });
+      try {
+        master.disconnect();
+      } catch {
+        // ignore
+      }
+    };
+  }
+
+  function resetBtnUI(btn: HTMLButtonElement | null) {
+    if (!btn) return;
+    btn.setAttribute('aria-pressed', 'false');
+    const icon = btn.querySelector('[data-btn-icon]');
+    if (icon) icon.textContent = '▶';
+    const card = btn.closest<HTMLElement>('[data-demo-card]');
+    const activeCls = card?.dataset.activeClass;
+    if (card && activeCls) card.classList.remove(activeCls);
+    const bar = card?.querySelector<HTMLElement>('[data-demo-progress]');
+    if (bar) bar.style.width = '0%';
+  }
+
+  document.querySelectorAll<HTMLButtonElement>('[data-demo-btn]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const isSameActive = activeButton === btn;
+
+      if (activeCleanup) {
+        activeCleanup();
+        activeCleanup = null;
+      }
+      resetBtnUI(activeButton);
+      activeButton = null;
+
+      if (isSameActive) {
+        return;
+      }
+
+      activeButton = btn;
+      btn.setAttribute('aria-pressed', 'true');
+      const icon = btn.querySelector('[data-btn-icon]');
+      if (icon) icon.textContent = '■';
+
+      const card = btn.closest<HTMLElement>('[data-demo-card]');
+      const activeCls = card?.dataset.activeClass;
+      if (card && activeCls) card.classList.add(activeCls);
+      const progressBar = card?.querySelector<HTMLElement>('[data-demo-progress]');
+      const nativeAudio = card?.querySelector<HTMLAudioElement>('[data-native-audio]');
+
+      if (nativeAudio && btn.dataset.audioUrl) {
+        nativeAudio.currentTime = 0;
+        void nativeAudio.play();
+
+        const onTime = () => {
+          if (progressBar && nativeAudio.duration) {
+            progressBar.style.width = `${(nativeAudio.currentTime / nativeAudio.duration) * 100}%`;
+          }
+        };
+        const onDone = () => {
+          resetBtnUI(btn);
+          if (activeButton === btn) activeButton = null;
+        };
+
+        nativeAudio.addEventListener('timeupdate', onTime);
+        nativeAudio.addEventListener('ended', onDone, { once: true });
+
+        activeCleanup = () => {
+          nativeAudio.pause();
+          nativeAudio.currentTime = 0;
+          nativeAudio.removeEventListener('timeupdate', onTime);
+        };
+      } else {
+        const preset = btn.dataset.synthPreset || 'clean-bypass';
+        activeCleanup = playSynthPreset(
+          preset,
+          (pct) => {
+            if (progressBar) progressBar.style.width = `${pct}%`;
+          },
+          () => {
+            resetBtnUI(btn);
+            if (activeButton === btn) {
+              activeButton = null;
+              activeCleanup = null;
+            }
+          }
+        );
+      }
+    });
+  });
+</script>
+

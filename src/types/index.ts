@@ -17,6 +17,55 @@ export interface BaseItem {
   updatedAt: string;
 }
 
+export type WorkshopAudioPreset =
+  | 'clean-bypass'
+  | 'fuzz-germanium'
+  | 'fuzz-gated'
+  | 'cmos-chord'
+  | 'cmos-crossmod'
+  | 'cmos-sag'
+  | 'sine-clean'
+  | 'hum-fault'
+  | 'shielded-clean';
+
+export interface WorkshopStage {
+  step: string;
+  title: string;
+  description: string;
+}
+
+export interface WorkshopDateOption {
+  id: string;
+  label: string;
+  isoDate: string;
+  spotsLeft?: number;
+}
+
+export interface WorkshopAudioDemo {
+  id: string;
+  title: string;
+  subtitle?: string;
+  audioUrl?: string;
+  synthPreset?: WorkshopAudioPreset;
+  durationLabel?: string;
+}
+
+export interface WorkshopEditionPhoto {
+  url: string;
+  alt: string;
+  caption?: string;
+}
+
+export interface WorkshopPastEdition {
+  id: string;
+  editionLabel: string;
+  dateLabel: string;
+  location?: string;
+  participantsCount?: number;
+  summary: string;
+  photos: WorkshopEditionPhoto[];
+}
+
 export interface WorkshopItem extends BaseItem {
   category: 'educativa';
   durationHours?: number;
@@ -24,6 +73,12 @@ export interface WorkshopItem extends BaseItem {
   materialsIncluded?: boolean;
   spotsLimit?: number;
   price?: number;
+  stages?: WorkshopStage[];
+  learningOutcomes?: string[];
+  upcomingDates?: WorkshopDateOption[];
+  audioDemos?: WorkshopAudioDemo[];
+  samplyPlaylistUrl?: string;
+  pastEditions?: WorkshopPastEdition[];
 }
 
 export interface ServiceItem extends BaseItem {
@@ -52,6 +107,28 @@ export interface ContactMessage {
   subscribeNewsletter: boolean;
   createdAt: string;
   read: boolean;
+}
+
+export type ReminderScheduleStatus =
+  | 'scheduled_resend'
+  | 'queued_for_cron'
+  | 'too_close_for_7d_reminder'
+  | 'skipped_no_email';
+
+export interface WorkshopRegistration {
+  id: string;
+  workshopId: string;
+  workshopSlug: string;
+  workshopTitle: string;
+  selectedDateLabel: string;
+  selectedDateIso: string;
+  name: string;
+  email?: string;
+  phone: string;
+  subscribeNewsletter: boolean;
+  reminderStatus: ReminderScheduleStatus;
+  reminderScheduledAt?: string;
+  createdAt: string;
 }
 
 export interface AdminUser {

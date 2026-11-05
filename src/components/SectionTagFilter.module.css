@@ -1,0 +1,97 @@
+.activeFilterBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  padding: 0.85rem 1.25rem;
+  margin-bottom: 1.75rem;
+  background: rgba(15, 15, 22, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 240, 255, 0.45);
+  border-radius: 2px;
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.12);
+}
+
+.activeFilterBar[hidden],
+.emptyState[hidden] {
+  display: none;
+}
+
+.filterInfo {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+.filterPrefix {
+  color: #00f0ff;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.activeTagChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  background: rgba(255, 42, 133, 0.24);
+  border: 1px solid #ff2a85;
+  border-radius: 2px;
+  color: #ffffff;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.filterCount {
+  color: #c8c8dc;
+}
+
+.clearBtn {
+  appearance: none;
+  cursor: pointer;
+  min-block-size: 30px;
+  padding: 0.35rem 0.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #00f0ff;
+  background: rgba(0, 240, 255, 0.1);
+  border: 1px solid rgba(0, 240, 255, 0.45);
+  border-radius: 2px;
+  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.clearBtn:hover {
+  background: rgba(0, 240, 255, 0.24);
+  border-color: #00f0ff;
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.28);
+}
+
+.clearBtn:focus-visible {
+  outline: 2px solid var(--color-accent-cyan);
+  outline-offset: 2px;
+}
+
+.emptyState {
+  padding: 2.25rem 1.5rem;
+  text-align: center;
+  background: rgba(18, 18, 26, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 2px;
+  margin-bottom: 2rem;
+}
+
+.emptyText {
+  color: #d0d0e2;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+

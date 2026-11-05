@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import SectionHeader from '../components/SectionHeader.astro';
 import Card from '../components/Card.astro';
+import SectionTagFilter from '../components/SectionTagFilter.astro';
 import { contentRepository } from '../repositories/content.repository';
 
 const workshops = await contentRepository.getItemsByCategory('educativa');
@@ -24,15 +25,15 @@ const workshops = await contentRepository.getItemsByCategory('educativa');
 
     <hr class="retroDivider" style="width: 100%; height: 1px; background: rgba(255, 255, 255, 0.2); border: none; margin: 2.5rem 0;" />
 
-    <section aria-label="Listado de Talleres Disponibles">
+    <SectionTagFilter ariaLabel="Filtrar talleres por etiqueta">
       {workshops.map((workshop) => (
         <Card
           item={workshop}
-          ctaText="RESERVAR CUPO / CONSULTAR"
-          ctaHref={`/contacto?interest=taller&item=${encodeURIComponent(workshop.title)}`}
+          ctaText="VER TALLER E INSCRIBIRME →"
+          ctaHref={`/educativa/${workshop.slug}`}
         />
       ))}
-    </section>
+    </SectionTagFilter>
 
   </div>
 </Layout>

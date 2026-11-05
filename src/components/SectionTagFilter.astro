@@ -1,0 +1,156 @@
+---
+import styles from './SectionTagFilter.module.css';
+
+interface Props {
+  ariaLabel: string;
+}
+
+const { ariaLabel } = Astro.props;
+---
+
+<div data-tag-filter-root>
+  <search aria-label={ariaLabel} class={styles.activeFilterBar} data-active-filter-bar hidden>
+    <div class={styles.filterInfo}>
+      <span class={styles.filterPrefix}>[ FILTRO ACTIVO ]</span>
+      <span class={styles.activeTagChip} data-active-tag-label></span>
+      <span class={styles.filterCount} data-active-tag-count></span>
+    </div>
+
+    <button type="button" class={styles.clearBtn} data-filter-reset="true">
+      MOSTRAR TODOS ×
+    </button>
+  </search>
+
+  <p class="sr-only" role="status" aria-live="polite" data-filter-announcer></p>
+
+  <div data-cards-container>
+    <slot />
+  </div>
+
+  <div class={styles.emptyState} data-empty-filter-state hidden>
+    <p class={styles.emptyText}>No hay publicaciones con esa etiqueta en esta sección.</p>
+    <button type="button" class={styles.clearBtn} data-filter-reset="true">
+      VER TODAS LAS PUBLICACIONES
+    </button>
+  </div>
+</div>
+
+<script>
+  import { normalizeTag, resolveNextActiveTag, cardMatchesTag } from '../lib/tag-filter';
+
+  function setupSectionTagFilters() {
+    const roots = document.querySelectorAll<HTMLElement>('[data-tag-filter-root]');
+
+    roots.forEach((root) => {
+      if (root.dataset.filterInitialized === 'true') return;
+      root.dataset.filterInitialized = 'true';
+
+      const cards = Array.from(root.querySelectorAll<HTMLElement>('[data-filterable-card]'));
+      const filterBar = root.querySelector<HTMLElement>('[data-active-filter-bar]');
+      const activeTagLabel = root.querySelector<HTMLElement>('[data-active-tag-label]');
+      const activeTagCount = root.querySelector<HTMLElement>('[data-active-tag-count]');
+      const emptyState = root.querySelector<HTMLElement>('[data-empty-filter-state]');
+      const announcer = root.querySelector<HTMLElement>('[data-filter-announcer]');
+
+      let activeTag: string | null = null;
+
+      const parseCardTags = (card: HTMLElement): string[] => {
+        try {
+          const raw = card.getAttribute('data-tags');
+          const parsed = raw ? JSON.parse(raw) : [];
+          return Array.isArray(parsed) ? parsed : [];
+        } catch {
+          return [];
+        }
+      };
+
+      const applyFilter = (nextTag: string | null, options: { announce?: boolean; syncUrl?: boolean; adjustScroll?: boolean } = {}) => {
+        activeTag = nextTag;
+        let visibleCount = 0;
+
+        cards.forEach((card) => {
+          const tags = parseCardTags(card);
+          const isMatch = cardMatchesTag(tags, activeTag);
+          card.hidden = !isMatch;
+          if (isMatch) visibleCount += 1;
+        });
+
+        const tagButtons = root.querySelectorAll<HTMLButtonElement>('button[data-filter-tag]');
+        tagButtons.forEach((btn) => {
+          const btnTag = btn.getAttribute('data-filter-tag') || '';
+          const pressed = Boolean(activeTag && normalizeTag(btnTag) === normalizeTag(activeTag));
+          btn.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+        });
+
+        const resetButtons = root.querySelectorAll<HTMLButtonElement>('[data-filterable-card] button[data-filter-reset]');
+        resetButtons.forEach((btn) => {
+          btn.setAttribute('aria-pressed', activeTag === null ? 'true' : 'false');
+        });
+
+        if (filterBar && activeTagLabel && activeTagCount) {
+          if (activeTag) {
+            filterBar.hidden = false;
+            activeTagLabel.textContent = activeTag;
+            activeTagCount.textContent = `(${visibleCount} de ${cards.length})`;
+          } else {
+            filterBar.hidden = true;
+            activeTagLabel.textContent = '';
+            activeTagCount.textContent = '';
+          }
+        }
+
+        if (emptyState) {
+          emptyState.hidden = !(activeTag && visibleCount === 0);
+        }
+
+        if (options.syncUrl !== false) {
+          const url = new URL(window.location.href);
+          if (activeTag) {
+            url.searchParams.set('tag', activeTag);
+          } else {
+            url.searchParams.delete('tag');
+          }
+          window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
+        }
+
+        if (options.announce && announcer) {
+          announcer.textContent = activeTag
+            ? `Filtrando por ${activeTag}: mostrando ${visibleCount} de ${cards.length}.`
+            : `Filtro desactivado: mostrando las ${cards.length} publicaciones.`;
+        }
+
+        if (options.adjustScroll && root.getBoundingClientRect().top < 0) {
+          root.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      };
+
+      root.addEventListener('click', (event) => {
+        const target = event.target as HTMLElement | null;
+        if (!target) return;
+
+        const resetBtn = target.closest<HTMLButtonElement>('button[data-filter-reset]');
+        if (resetBtn && root.contains(resetBtn)) {
+          if (activeTag !== null) {
+            applyFilter(null, { announce: true, syncUrl: true });
+          }
+          return;
+        }
+
+        const tagBtn = target.closest<HTMLButtonElement>('button[data-filter-tag]');
+        if (tagBtn && root.contains(tagBtn)) {
+          const clickedTag = tagBtn.getAttribute('data-filter-tag');
+          const nextTag = resolveNextActiveTag(activeTag, clickedTag);
+          applyFilter(nextTag, { announce: true, syncUrl: true, adjustScroll: true });
+        }
+      });
+
+      const initialUrlTag = new URLSearchParams(window.location.search).get('tag');
+      if (initialUrlTag && initialUrlTag.trim().length > 0) {
+        applyFilter(initialUrlTag.trim(), { announce: false, syncUrl: false });
+      }
+    });
+  }
+
+  setupSectionTagFilters();
+  document.addEventListener('astro:after-swap', setupSectionTagFilters);
+</script>

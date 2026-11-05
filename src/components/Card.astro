@@ -25,18 +25,13 @@ const getCategoryVariant = (cat: string) => {
 };
 ---
 
-<article class:list={[styles.card, layout === 'horizontal' ? styles.cardHorizontal : styles.gridCard]}>
+<article
+  class:list={[styles.card, layout === 'horizontal' ? styles.cardHorizontal : styles.gridCard]}
+  data-filterable-card
+  data-tags={JSON.stringify(item.tags)}
+>
   <div class={styles.contentCol}>
     <div>
-      <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
-        <Badge variant={getCategoryVariant(item.category)}>
-          {item.category === 'educativa' ? 'TALLER DIY' : item.category === 'servicios' ? 'SERVICIO' : 'PROYECTO'}
-        </Badge>
-        {item.tags.map((tag) => (
-          <Badge>{tag}</Badge>
-        ))}
-      </div>
-
       <h2 class={styles.cardTitle}>
         {item.title}
       </h2>
@@ -44,25 +39,36 @@ const getCategoryVariant = (cat: string) => {
       <p class={styles.description}>{item.summary}</p>
     </div>
 
-    <div class={styles.footerActions}>
-      {'price' in item && item.price ? (
-        <span class={styles.priceTag}>
-          ${item.price.toLocaleString('es-CL')} CLP
-        </span>
-      ) : 'startingPrice' in item && item.startingPrice ? (
-        <span class={styles.priceTag}>
-          Desde ${item.startingPrice.toLocaleString('es-CL')} CLP
-        </span>
-      ) : (
-        <span class={styles.priceTag} style="color: #00f0ff;">
-          OPEN SOURCE DIY
-        </span>
-      )}
+    <footer class={styles.cardFooter}>
+      <div class={styles.footerActions}>
+        {'price' in item && item.price ? (
+          <span class={styles.priceTag}>
+            ${item.price.toLocaleString('es-CL')} CLP
+          </span>
+        ) : 'startingPrice' in item && item.startingPrice ? (
+          <span class={styles.priceTag}>
+            Desde ${item.startingPrice.toLocaleString('es-CL')} CLP
+          </span>
+        ) : (
+          <span class={styles.priceTag} style="color: #00f0ff;">
+            OPEN SOURCE DIY
+          </span>
+        )}
 
-      <Button href={actionHref} size="sm" variant={item.category === 'educativa' ? 'accentPink' : 'secondary'}>
-        {ctaText}
-      </Button>
-    </div>
+        <Button href={actionHref} size="sm" variant={item.category === 'educativa' ? 'accentPink' : 'secondary'}>
+          {ctaText}
+        </Button>
+      </div>
+
+      <div class={styles.badgesRow} role="group" aria-label="Filtrar por etiqueta">
+        <Badge variant={getCategoryVariant(item.category)} filterReset>
+          {item.category === 'educativa' ? 'TALLER DIY' : item.category === 'servicios' ? 'SERVICIO' : 'PROYECTO'}
+        </Badge>
+        {item.tags.map((tag) => (
+          <Badge filterTag={tag}>{tag}</Badge>
+        ))}
+      </div>
+    </footer>
   </div>
 
   <div class={styles.mediaCol}>

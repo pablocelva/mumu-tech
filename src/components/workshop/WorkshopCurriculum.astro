@@ -1,0 +1,56 @@
+---
+import type { WorkshopStage } from '../../types';
+import styles from './WorkshopCurriculum.module.css';
+
+interface Props {
+  stages?: WorkshopStage[];
+  learningOutcomes?: string[];
+}
+
+const { stages = [], learningOutcomes = [] } = Astro.props;
+const hasStages = stages.length > 0;
+const hasOutcomes = learningOutcomes.length > 0;
+const isSingle = (hasStages && !hasOutcomes) || (!hasStages && hasOutcomes);
+---
+
+{(hasStages || hasOutcomes) && (
+  <section class={styles.section} aria-label="Programa y aprendizajes del taller">
+    <div class={`${styles.twoColGrid} ${isSingle ? styles.singleColGrid : ''}`}>
+      {hasStages && (
+        <div class={styles.panel}>
+          <h2 id="stages-heading" class={styles.heading}>
+            [ PROGRAMA POR ETAPAS ]
+          </h2>
+          <ol class={styles.stagesList} aria-labelledby="stages-heading">
+            {stages.map((st) => (
+              <li class={styles.stageCard}>
+                <div class={styles.stageHeader}>
+                  <span class={styles.stageStep}>{st.step}</span>
+                  <h3 class={styles.stageTitle}>{st.title}</h3>
+                </div>
+                <p class={styles.stageDesc}>{st.description}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+
+      {hasOutcomes && (
+        <div class={styles.panel}>
+          <h2 id="outcomes-heading" class={styles.heading}>
+            [ EN ESTE TALLER APRENDERÁS ]
+          </h2>
+          <ul class={styles.outcomesList} aria-labelledby="outcomes-heading">
+            {learningOutcomes.map((outcome) => (
+              <li class={styles.outcomeItem}>
+                <span class={styles.outcomeCheck} aria-hidden="true">✓</span>
+                <span>{outcome}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  </section>
+)}
+

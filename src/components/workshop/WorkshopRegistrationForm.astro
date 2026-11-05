@@ -1,0 +1,317 @@
+---
+import type { WorkshopItem } from '../../types';
+import Button from '../Button.astro';
+import styles from './WorkshopRegistrationForm.module.css';
+
+interface Props {
+  workshop: WorkshopItem;
+  instanceId: 'desktop' | 'modal';
+  inModal?: boolean;
+}
+
+const { workshop, instanceId, inModal = false } = Astro.props;
+
+const p = `ws-reg-${instanceId}`;
+const dates =
+  workshop.upcomingDates && workshop.upcomingDates.length > 0
+    ? workshop.upcomingDates
+    : [
+        {
+          id: 'open-waitlist',
+          label: 'Próxima convocatoria abierta (coordinar horario)',
+          isoDate: '2026-12-15T10:00:00-03:00',
+        },
+      ];
+---
+
+<form
+  id={`${p}-form`}
+  data-workshop-reg-form
+  action="/api/workshop-register"
+  method="POST"
+  class={`${styles.formCard} ${inModal ? styles.formCardModal : ''}`}
+>
+  {!inModal && (
+    <div class={styles.formHeader}>
+      <span class={styles.formBadge}>[ INSCRIPCIÓN DIRECTA ]</span>
+      <h2 class={styles.formTitle}>RESERVAR CUPO</h2>
+      <p class={styles.formSubtitle}>
+        Elige tu fecha y asegura tu banco de trabajo con todos los materiales incluidos.
+      </p>
+    </div>
+  )}
+
+  <div
+    id={`${p}-status`}
+    data-reg-status
+    class={styles.statusMessage}
+    role="status"
+    aria-live="polite"
+  ></div>
+
+  <input type="hidden" name="workshopId" value={workshop.id} />
+  <input type="hidden" name="workshopSlug" value={workshop.slug} />
+  <input type="hidden" name="workshopTitle" value={workshop.title} />
+
+  <div class={styles.visuallyHidden} aria-hidden="true">
+    <label for={`${p}-website`}>Sitio web (dejar vacío)</label>
+    <input
+      type="text"
+      id={`${p}-website`}
+      name="website"
+      tabindex="-1"
+      autocomplete="off"
+    />
+  </div>
+
+  <div class={styles.fieldGroup}>
+    <label for={`${p}-date`} class={styles.label}>
+      Fecha del Taller <span class={styles.requiredStar} aria-hidden="true">*</span>
+    </label>
+    <select
+      id={`${p}-date`}
+      name="selectedDate"
+      class={styles.select}
+      required
+      aria-errormessage={`${p}-date-err`}
+      autofocus={inModal ? true : undefined}
+    >
+      <option value="" disabled selected>Selecciona una fecha disponible...</option>
+      {dates.map((d) => (
+        <option value={`${d.isoDate}||${d.label}`}>{d.label}</option>
+      ))}
+    </select>
+    <div id={`${p}-date-err`} class={styles.errorMsg}>
+      <span>⚠</span> Selecciona una de las fechas disponibles del taller.
+    </div>
+  </div>
+
+  <div class={styles.fieldGroup}>
+    <label for={`${p}-name`} class={styles.label}>
+      Nombre o Apodo <span class={styles.requiredStar} aria-hidden="true">*</span>
+    </label>
+    <input
+      type="text"
+      id={`${p}-name`}
+      name="name"
+      required
+      minlength="2"
+      maxlength="120"
+      placeholder="Tu nombre completo o apodo"
+      autocomplete="name"
+      enterkeyhint="next"
+      class={styles.input}
+      aria-errormessage={`${p}-name-err`}
+    />
+    <div id={`${p}-name-err`} class={styles.errorMsg}>
+      <span>⚠</span> Ingresa tu nombre (mínimo 2 caracteres).
+    </div>
+  </div>
+
+  <div class={styles.fieldGroup}>
+    <label for={`${p}-phone`} class={styles.label}>
+      Teléfono / WhatsApp <span class={styles.requiredStar} aria-hidden="true">*</span>
+    </label>
+    <span id={`${p}-phone-hint`} class={styles.hint}>
+      Obligatorio para coordinar tu cupo (ej: +56 9 1234 5678).
+    </span>
+    <input
+      type="tel"
+      id={`${p}-phone`}
+      name="phone"
+      required
+      pattern="[+0-9\s()\-]{8,20}"
+      placeholder="+56 9 1234 5678"
+      autocomplete="tel"
+      inputmode="tel"
+      enterkeyhint="next"
+      class={styles.input}
+      aria-describedby={`${p}-phone-hint`}
+      aria-errormessage={`${p}-phone-err`}
+    />
+    <div id={`${p}-phone-err`} class={styles.errorMsg}>
+      <span>⚠</span> Ingresa un teléfono válido de 8 a 20 dígitos.
+    </div>
+  </div>
+
+  <div class={styles.fieldGroup}>
+    <label for={`${p}-email`} class={styles.label}>
+      Correo Electrónico <span class={styles.optionalTag}>(Opcional)</span>
+    </label>
+    <span id={`${p}-email-hint`} class={styles.hint}>
+      Opcional, por si prefieres recibir el comprobante en tu correo.
+    </span>
+    <input
+      type="email"
+      id={`${p}-email`}
+      name="email"
+      placeholder="tu-correo@ejemplo.com"
+      autocomplete="email"
+      autocorrect="off"
+      autocapitalize="off"
+      spellcheck="false"
+      enterkeyhint="done"
+      class={styles.input}
+      aria-describedby={`${p}-email-hint`}
+      aria-errormessage={`${p}-email-err`}
+    />
+    <div id={`${p}-email-err`} class={styles.errorMsg}>
+      <span>⚠</span> Formato de correo inválido (ej: nombre@dominio.com).
+    </div>
+  </div>
+
+  <label class={styles.checkboxRow} for={`${p}-newsletter`}>
+    <input
+      type="checkbox"
+      id={`${p}-newsletter`}
+      name="subscribeNewsletter"
+      value="true"
+      class={styles.checkbox}
+      checked
+    />
+    <span>Avisarme de próximas ediciones, kits DIY y novedades (requiere correo)</span>
+  </label>
+
+  <div class={styles.submitWrap}>
+    <Button type="submit" variant="primary" size="lg" fullWidth data-reg-submit>
+      INSCRIBIRME AL TALLER
+    </Button>
+  </div>
+</form>
+
+<script>
+  const statusClasses = {
+    success: '',
+    error: '',
+  };
+
+  // Fallback WeakMap para navegadores antiguos sin soporte CSS :user-invalid
+  const initUserInvalidFallback = (root: ParentNode) => {
+    if (typeof CSS !== 'undefined' && CSS.supports && CSS.supports('selector(:user-invalid)')) {
+      return;
+    }
+    const dirty = new WeakMap<Element, { interacted: boolean; blurred: boolean }>();
+    const update = (el: HTMLInputElement | HTMLSelectElement) => {
+      const valid = el.checkValidity();
+      el.classList.toggle('user-invalid-fallback', !valid);
+      if (!valid) {
+        el.setAttribute('aria-invalid', 'true');
+      } else {
+        el.removeAttribute('aria-invalid');
+      }
+    };
+
+    root.addEventListener(
+      'blur',
+      (e) => {
+        const t = e.target as HTMLInputElement | HTMLSelectElement;
+        if (!t || typeof t.checkValidity !== 'function') return;
+        const st = dirty.get(t) || { interacted: false, blurred: false };
+        st.blurred = true;
+        dirty.set(t, st);
+        if (st.interacted) update(t);
+      },
+      true
+    );
+
+    const onEdit = (e: Event) => {
+      const t = e.target as HTMLInputElement | HTMLSelectElement;
+      if (!t || typeof t.checkValidity !== 'function') return;
+      const st = dirty.get(t) || { interacted: false, blurred: false };
+      st.interacted = true;
+      dirty.set(t, st);
+      if (st.blurred) update(t);
+    };
+
+    root.addEventListener('input', onEdit);
+    root.addEventListener('change', onEdit);
+  };
+
+  const syncAriaInvalid = (el: EventTarget | null) => {
+    if (!(el instanceof HTMLElement)) return;
+    if (typeof CSS !== 'undefined' && CSS.supports?.('selector(:user-invalid)')) {
+      el.setAttribute('aria-invalid', el.matches(':user-invalid') ? 'true' : 'false');
+    }
+  };
+
+  const forms = document.querySelectorAll<HTMLFormElement>('form[data-workshop-reg-form]');
+  forms.forEach((form) => {
+    if (form.dataset.bound === 'true') return;
+    form.dataset.bound = 'true';
+
+    initUserInvalidFallback(form);
+    form.addEventListener('blur', (e) => syncAriaInvalid(e.target), true);
+    form.addEventListener('input', (e) => {
+      if (e.target instanceof HTMLElement && e.target.hasAttribute('aria-invalid')) {
+        syncAriaInvalid(e.target);
+      }
+    });
+
+    const statusEl = form.querySelector<HTMLElement>('[data-reg-status]');
+    const submitBtn = form.querySelector<HTMLButtonElement>('[data-reg-submit]');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      if (!statusEl || !submitBtn) return;
+
+      const originalLabel = submitBtn.textContent || 'INSCRIBIRME AL TALLER';
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'PROCESANDO INSCRIPCIÓN...';
+      statusEl.style.display = 'none';
+      statusEl.textContent = '';
+
+      const fd = new FormData(form);
+      const rawDate = String(fd.get('selectedDate') || '');
+      const [selectedDateIso = '', selectedDateLabel = ''] = rawDate.split('||');
+
+      const payload = {
+        workshopId: String(fd.get('workshopId') || ''),
+        workshopSlug: String(fd.get('workshopSlug') || ''),
+        workshopTitle: String(fd.get('workshopTitle') || ''),
+        selectedDateIso,
+        selectedDateLabel,
+        name: String(fd.get('name') || ''),
+        email: String(fd.get('email') || ''),
+        phone: String(fd.get('phone') || ''),
+        subscribeNewsletter: fd.get('subscribeNewsletter') === 'true',
+        website: String(fd.get('website') || ''),
+      };
+
+      try {
+        const res = await fetch('/api/workshop-register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const result = await res.json();
+
+        if (res.ok && result.success) {
+          statusEl.style.cssText =
+            'display:block;background:rgba(57,255,20,0.14);border:1px solid #39ff14;color:#9cff89;padding:0.9rem 1rem;border-radius:2px;font-family:monospace;';
+          statusEl.textContent = '✓ ' + (result.message || '¡Inscripción registrada con éxito!');
+          form.reset();
+        } else {
+          statusEl.style.cssText =
+            'display:block;background:rgba(255,42,133,0.15);border:1px solid #ff2a85;color:#ff9ec7;padding:0.9rem 1rem;border-radius:2px;font-family:monospace;';
+          statusEl.textContent =
+            '⚠ ' + (result.error || 'Revisa los campos obligatorios e intenta nuevamente.');
+        }
+      } catch {
+        statusEl.style.cssText =
+          'display:block;background:rgba(255,42,133,0.15);border:1px solid #ff2a85;color:#ff9ec7;padding:0.9rem 1rem;border-radius:2px;font-family:monospace;';
+        statusEl.textContent = '⚠ Error de conexión. Intenta nuevamente en unos segundos.';
+      } finally {
+        void statusClasses;
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalLabel;
+      }
+    });
+  });
+</script>
+

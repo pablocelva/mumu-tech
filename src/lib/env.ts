@@ -9,6 +9,9 @@ function getProcessEnv() {
     CLOUDINARY_API_KEY: import.meta.env.CLOUDINARY_API_KEY,
     CLOUDINARY_API_SECRET: import.meta.env.CLOUDINARY_API_SECRET,
     RESEND_API_KEY: import.meta.env.RESEND_API_KEY,
+    RESEND_FROM_EMAIL: import.meta.env.RESEND_FROM_EMAIL || 'Mumu Tech <talleres@mumutech.cl>',
+    RESEND_ADMIN_EMAIL: import.meta.env.RESEND_ADMIN_EMAIL || 'hola@mumutech.cl',
+    RESEND_AUDIENCE_ID: import.meta.env.RESEND_AUDIENCE_ID,
     ADMIN_ALLOWED_EMAILS: import.meta.env.ADMIN_ALLOWED_EMAILS,
     ADMIN_SESSION_SECRET: import.meta.env.ADMIN_SESSION_SECRET || 'dev-secret-key-12345',
   };

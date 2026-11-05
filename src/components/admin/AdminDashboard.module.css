@@ -125,6 +125,32 @@
   border-color: #ff2a85;
 }
 
+.publishBtn {
+  border-color: rgba(57, 255, 20, 0.45);
+  color: #8aff75;
+}
+
+.publishBtn:hover {
+  background: rgba(57, 255, 20, 0.16);
+  border-color: #39ff14;
+  color: #ffffff;
+}
+
+.unpublishBtn {
+  border-color: rgba(255, 255, 255, 0.28);
+  color: #c4c4d8;
+}
+
+.unpublishBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #ffffff;
+  color: #ffffff;
+}
+
+.rowHidden td {
+  opacity: 0.62;
+}
+
 .itemModal {
   margin-top: 2rem;
   padding: 1.5rem;

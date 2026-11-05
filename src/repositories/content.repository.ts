@@ -1,10 +1,11 @@
-import type { ContentItem, ContentCategory, ContactMessage } from '../types';
+import type { ContentItem, ContentCategory, ContactMessage, WorkshopRegistration } from '../types';
 import { INITIAL_CONTENT_ITEMS } from './seed.data';
 import { getSupabaseClient, isSupabaseConfigured } from '../lib/supabase';
 
 class ContentRepository {
   private inMemoryItems: ContentItem[] = [...INITIAL_CONTENT_ITEMS];
   private inMemoryMessages: ContactMessage[] = [];
+  private inMemoryRegistrations: WorkshopRegistration[] = [];
 
   async getAllItems(): Promise<ContentItem[]> {
     const supabase = getSupabaseClient();
@@ -81,6 +82,34 @@ class ContentRepository {
     return this.inMemoryItems.length < initialLength;
   }
 
+  async setItemPublished(id: string, published: boolean): Promise<ContentItem | null> {
+    const idx = this.inMemoryItems.findIndex((i) => i.id === id);
+    if (idx < 0) {
+      return null;
+    }
+
+    const updatedItem: ContentItem = {
+      ...this.inMemoryItems[idx],
+      published,
+      updatedAt: new Date().toISOString(),
+    };
+    this.inMemoryItems[idx] = updatedItem;
+
+    const supabase = getSupabaseClient();
+    if (supabase && isSupabaseConfigured()) {
+      try {
+        await supabase
+          .from('content_items')
+          .update({ published, updatedAt: updatedItem.updatedAt })
+          .eq('id', id);
+      } catch (err) {
+        console.error('Supabase publish toggle failed:', err);
+      }
+    }
+
+    return updatedItem;
+  }
+
   async saveContactMessage(message: Omit<ContactMessage, 'id' | 'createdAt' | 'read'>): Promise<ContactMessage> {
     const newMessage: ContactMessage = {
       ...message,
@@ -122,10 +151,53 @@ class ContentRepository {
     return [...this.inMemoryMessages];
   }
 
+  async saveWorkshopRegistration(
+    registration: Omit<WorkshopRegistration, 'id' | 'createdAt'>
+  ): Promise<WorkshopRegistration> {
+    const newRegistration: WorkshopRegistration = {
+      ...registration,
+      id: `reg-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      createdAt: new Date().toISOString(),
+    };
+
+    this.inMemoryRegistrations.unshift(newRegistration);
+
+    const supabase = getSupabaseClient();
+    if (supabase && isSupabaseConfigured()) {
+      try {
+        await supabase.from('workshop_registrations').insert(newRegistration);
+      } catch (err) {
+        console.warn('Supabase workshop_registrations insert failed, saved to memory:', err);
+      }
+    }
+
+    return newRegistration;
+  }
+
+  async getWorkshopRegistrations(): Promise<WorkshopRegistration[]> {
+    const supabase = getSupabaseClient();
+    if (supabase && isSupabaseConfigured()) {
+      try {
+        const { data, error } = await supabase
+          .from('workshop_registrations')
+          .select('*')
+          .order('createdAt', { ascending: false });
+
+        if (!error && data) {
+          return data as WorkshopRegistration[];
+        }
+      } catch (err) {
+        console.warn('Supabase workshop_registrations query failed:', err);
+      }
+    }
+    return [...this.inMemoryRegistrations];
+  }
+
   // Reset method for testing
   resetToSeed(): void {
     this.inMemoryItems = [...INITIAL_CONTENT_ITEMS];
     this.inMemoryMessages = [];
+    this.inMemoryRegistrations = [];
   }
 }
 
