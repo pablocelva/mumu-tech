@@ -76,11 +76,22 @@ const isActive = (href: string) => {
 </header>
 
 <script>
+  function closeCurrentMobileMenu() {
+    const toggleBtn = document.getElementById('menu-toggle-btn');
+    const mobileMenu = document.getElementById('mobile-nav-menu');
+    if (!toggleBtn || !mobileMenu) return;
+    toggleBtn.setAttribute('aria-expanded', 'false');
+    toggleBtn.setAttribute('aria-label', 'Abrir menú');
+    toggleBtn.classList.remove('isOpen');
+    mobileMenu.classList.remove('isOpen');
+  }
+
   function setupMobileMenu() {
     const toggleBtn = document.getElementById('menu-toggle-btn');
     const mobileMenu = document.getElementById('mobile-nav-menu');
 
-    if (!toggleBtn || !mobileMenu) return;
+    if (!toggleBtn || !mobileMenu || toggleBtn.dataset.bound === 'true') return;
+    toggleBtn.dataset.bound = 'true';
 
     const toggleMenu = (open?: boolean) => {
       const isCurrentlyOpen = toggleBtn.getAttribute('aria-expanded') === 'true';
@@ -88,7 +99,7 @@ const isActive = (href: string) => {
 
       toggleBtn.setAttribute('aria-expanded', String(shouldOpen));
       toggleBtn.setAttribute('aria-label', shouldOpen ? 'Cerrar menú' : 'Abrir menú');
-      
+
       if (shouldOpen) {
         toggleBtn.classList.add('isOpen');
         mobileMenu.classList.add('isOpen');
@@ -103,28 +114,28 @@ const isActive = (href: string) => {
       toggleMenu();
     });
 
-    // Close when clicking any nav link
     mobileMenu.querySelectorAll('a').forEach((link) => {
       link.addEventListener('click', () => {
         toggleMenu(false);
       });
     });
-
-    // Close when clicking outside
-    document.addEventListener('click', (e) => {
-      if (!mobileMenu.contains(e.target as Node) && !toggleBtn.contains(e.target as Node)) {
-        toggleMenu(false);
-      }
-    });
-
-    // Close with Escape key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        toggleMenu(false);
-      }
-    });
   }
 
+  document.addEventListener('click', (e) => {
+    const toggleBtn = document.getElementById('menu-toggle-btn');
+    const mobileMenu = document.getElementById('mobile-nav-menu');
+    if (!toggleBtn || !mobileMenu) return;
+    if (!mobileMenu.contains(e.target as Node) && !toggleBtn.contains(e.target as Node)) {
+      closeCurrentMobileMenu();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeCurrentMobileMenu();
+    }
+  });
+
   setupMobileMenu();
-  document.addEventListener('astro:after-swap', setupMobileMenu);
+  document.addEventListener('astro:page-load', setupMobileMenu);
 </script>

@@ -36,6 +36,22 @@ export function getOptimizedImageUrl(
       const transformString = `f_${format},q_${quality},w_${width},c_${crop}`;
       return trimmed.replace('/upload/', `/upload/${transformString}/`);
     }
+
+    if (
+      options.width &&
+      (trimmed.includes('images.unsplash.com') || trimmed.includes('plus.unsplash.com'))
+    ) {
+      const parsed = new URL(trimmed);
+      parsed.searchParams.set('w', String(options.width));
+      if (!parsed.searchParams.has('auto')) {
+        parsed.searchParams.set('auto', 'format');
+      }
+      if (!parsed.searchParams.has('q')) {
+        parsed.searchParams.set('q', '75');
+      }
+      return parsed.toString();
+    }
+
     return trimmed;
   }
 

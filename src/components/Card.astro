@@ -10,9 +10,20 @@ interface Props {
   layout?: 'horizontal' | 'grid';
   ctaText?: string;
   ctaHref?: string;
+  priority?: boolean;
+  eager?: boolean;
 }
 
-const { item, layout = 'horizontal', ctaText = 'CONSULTAR / DETALLES', ctaHref } = Astro.props;
+const {
+  item,
+  layout = 'horizontal',
+  ctaText = 'CONSULTAR / DETALLES',
+  ctaHref,
+  priority = false,
+  eager = false,
+} = Astro.props;
+
+const isEager = priority || eager;
 
 const actionHref = ctaHref || `/contacto?interest=${item.category === 'educativa' ? 'taller' : item.category === 'servicios' ? 'servicio' : 'proyecto'}&item=${encodeURIComponent(item.title)}`;
 
@@ -75,7 +86,9 @@ const getCategoryVariant = (cat: string) => {
     <img
       src={optimizedImg}
       alt={item.imageAlt || item.title}
-      loading="lazy"
+      loading={isEager ? undefined : 'lazy'}
+      fetchpriority={priority ? 'high' : undefined}
+      decoding={isEager ? 'sync' : 'async'}
       class={styles.image}
       width="800"
       height="500"

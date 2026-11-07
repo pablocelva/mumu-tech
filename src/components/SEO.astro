@@ -24,6 +24,8 @@ const isNoIndex = robots.toLowerCase().includes('noindex');
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="preconnect" href="https://images.unsplash.com" crossorigin />
+<link rel="dns-prefetch" href="https://res.cloudinary.com" />
 {!isNoIndex && <link rel="canonical" href={canonicalURL} />}
 <meta name="generator" content={Astro.generator} />
 

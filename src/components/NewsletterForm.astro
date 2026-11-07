@@ -130,5 +130,5 @@ const { idPrefix = 'newsletter', class: className = '' } = Astro.props;
   }
 
   setupNewsletterForms();
-  document.addEventListener('astro:after-swap', setupNewsletterForms);
+  document.addEventListener('astro:page-load', setupNewsletterForms);
 </script>

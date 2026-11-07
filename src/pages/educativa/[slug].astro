@@ -24,7 +24,7 @@ if (!workshop) {
 }
 
 const heroImg = workshop
-  ? getOptimizedImageUrl(workshop.imageUrl, { width: 1000, crop: 'fill' })
+  ? getOptimizedImageUrl(workshop.imageUrl, { width: 800, quality: 'auto', format: 'auto' })
   : DEFAULT_PLACEHOLDER_IMAGE;
 
 const formattedPrice =
@@ -73,6 +73,7 @@ const formattedPrice =
                 alt={workshop.imageAlt}
                 class={styles.coverImg}
                 fetchpriority="high"
+                decoding="sync"
                 width="960"
                 height="540"
                 onerror={`this.onerror=null;this.src='${DEFAULT_PLACEHOLDER_IMAGE}';`}
@@ -190,12 +191,15 @@ const formattedPrice =
 </Layout>
 
 <script>
-  const openBtn = document.getElementById('open-mobile-reg-modal');
-  const regDialog = document.getElementById(
-    'mobile-registration-modal'
-  ) as HTMLDialogElement | null;
+  function setupWorkshopModal() {
+    const openBtn = document.getElementById('open-mobile-reg-modal');
+    const regDialog = document.getElementById(
+      'mobile-registration-modal'
+    ) as HTMLDialogElement | null;
 
-  if (openBtn && regDialog) {
+    if (!openBtn || !regDialog || openBtn.dataset.bound === 'true') return;
+    openBtn.dataset.bound = 'true';
+
     openBtn.addEventListener('click', () => {
       regDialog.showModal();
     });
@@ -220,5 +224,8 @@ const formattedPrice =
       });
     }
   }
+
+  setupWorkshopModal();
+  document.addEventListener('astro:page-load', setupWorkshopModal);
 </script>
 

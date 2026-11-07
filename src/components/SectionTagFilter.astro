@@ -152,5 +152,5 @@ const { ariaLabel } = Astro.props;
   }
 
   setupSectionTagFilters();
-  document.addEventListener('astro:after-swap', setupSectionTagFilters);
+  document.addEventListener('astro:page-load', setupSectionTagFilters);
 </script>

@@ -22,7 +22,7 @@ if (!service) {
 }
 
 const heroImg = service
-  ? getOptimizedImageUrl(service.imageUrl, { width: 1000, crop: 'fill' })
+  ? getOptimizedImageUrl(service.imageUrl, { width: 800, quality: 'auto', format: 'auto' })
   : DEFAULT_PLACEHOLDER_IMAGE;
 
 const isMod = service?.serviceType === 'Modificación';
@@ -79,6 +79,7 @@ const mobileModalCta = isMod
                 alt={service.imageAlt}
                 class={styles.coverImg}
                 fetchpriority="high"
+                decoding="sync"
                 width="960"
                 height="540"
                 onerror={`this.onerror=null;this.src='${DEFAULT_PLACEHOLDER_IMAGE}';`}
@@ -166,12 +167,15 @@ const mobileModalCta = isMod
 </Layout>
 
 <script>
-  const openBtn = document.getElementById('open-mobile-ticket-modal');
-  const ticketDialog = document.getElementById(
-    'mobile-ticket-modal'
-  ) as HTMLDialogElement | null;
+  function setupServiceModal() {
+    const openBtn = document.getElementById('open-mobile-ticket-modal');
+    const ticketDialog = document.getElementById(
+      'mobile-ticket-modal'
+    ) as HTMLDialogElement | null;
 
-  if (openBtn && ticketDialog) {
+    if (!openBtn || !ticketDialog || openBtn.dataset.bound === 'true') return;
+    openBtn.dataset.bound = 'true';
+
     openBtn.addEventListener('click', () => {
       ticketDialog.showModal();
     });
@@ -196,5 +200,8 @@ const mobileModalCta = isMod
       });
     }
   }
+
+  setupServiceModal();
+  document.addEventListener('astro:page-load', setupServiceModal);
 </script>
 

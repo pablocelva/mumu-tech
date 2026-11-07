@@ -268,71 +268,83 @@ const { demos = [], samplyPlaylistUrl, workshopTitle } = Astro.props;
     if (bar) bar.style.width = '0%';
   }
 
-  document.querySelectorAll<HTMLButtonElement>('[data-demo-btn]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const isSameActive = activeButton === btn;
+  function stopActiveAudioDemo() {
+    if (activeCleanup) {
+      activeCleanup();
+      activeCleanup = null;
+    }
+    resetBtnUI(activeButton);
+    activeButton = null;
+  }
 
-      if (activeCleanup) {
-        activeCleanup();
-        activeCleanup = null;
-      }
-      resetBtnUI(activeButton);
-      activeButton = null;
+  function setupAudioDemos() {
+    document.querySelectorAll<HTMLButtonElement>('[data-demo-btn]').forEach((btn) => {
+      if (btn.dataset.bound === 'true') return;
+      btn.dataset.bound = 'true';
 
-      if (isSameActive) {
-        return;
-      }
+      btn.addEventListener('click', () => {
+        const isSameActive = activeButton === btn;
+        stopActiveAudioDemo();
 
-      activeButton = btn;
-      btn.setAttribute('aria-pressed', 'true');
-      const icon = btn.querySelector('[data-btn-icon]');
-      if (icon) icon.textContent = '■';
+        if (isSameActive) {
+          return;
+        }
 
-      const card = btn.closest<HTMLElement>('[data-demo-card]');
-      const activeCls = card?.dataset.activeClass;
-      if (card && activeCls) card.classList.add(activeCls);
-      const progressBar = card?.querySelector<HTMLElement>('[data-demo-progress]');
-      const nativeAudio = card?.querySelector<HTMLAudioElement>('[data-native-audio]');
+        activeButton = btn;
+        btn.setAttribute('aria-pressed', 'true');
+        const icon = btn.querySelector('[data-btn-icon]');
+        if (icon) icon.textContent = '■';
 
-      if (nativeAudio && btn.dataset.audioUrl) {
-        nativeAudio.currentTime = 0;
-        void nativeAudio.play();
+        const card = btn.closest<HTMLElement>('[data-demo-card]');
+        const activeCls = card?.dataset.activeClass;
+        if (card && activeCls) card.classList.add(activeCls);
+        const progressBar = card?.querySelector<HTMLElement>('[data-demo-progress]');
+        const nativeAudio = card?.querySelector<HTMLAudioElement>('[data-native-audio]');
 
-        const onTime = () => {
-          if (progressBar && nativeAudio.duration) {
-            progressBar.style.width = `${(nativeAudio.currentTime / nativeAudio.duration) * 100}%`;
-          }
-        };
-        const onDone = () => {
-          resetBtnUI(btn);
-          if (activeButton === btn) activeButton = null;
-        };
-
-        nativeAudio.addEventListener('timeupdate', onTime);
-        nativeAudio.addEventListener('ended', onDone, { once: true });
-
-        activeCleanup = () => {
-          nativeAudio.pause();
+        if (nativeAudio && btn.dataset.audioUrl) {
           nativeAudio.currentTime = 0;
-          nativeAudio.removeEventListener('timeupdate', onTime);
-        };
-      } else {
-        const preset = btn.dataset.synthPreset || 'clean-bypass';
-        activeCleanup = playSynthPreset(
-          preset,
-          (pct) => {
-            if (progressBar) progressBar.style.width = `${pct}%`;
-          },
-          () => {
-            resetBtnUI(btn);
-            if (activeButton === btn) {
-              activeButton = null;
-              activeCleanup = null;
+          void nativeAudio.play();
+
+          const onTime = () => {
+            if (progressBar && nativeAudio.duration) {
+              progressBar.style.width = `${(nativeAudio.currentTime / nativeAudio.duration) * 100}%`;
             }
-          }
-        );
-      }
+          };
+          const onDone = () => {
+            resetBtnUI(btn);
+            if (activeButton === btn) activeButton = null;
+          };
+
+          nativeAudio.addEventListener('timeupdate', onTime);
+          nativeAudio.addEventListener('ended', onDone, { once: true });
+
+          activeCleanup = () => {
+            nativeAudio.pause();
+            nativeAudio.currentTime = 0;
+            nativeAudio.removeEventListener('timeupdate', onTime);
+          };
+        } else {
+          const preset = btn.dataset.synthPreset || 'clean-bypass';
+          activeCleanup = playSynthPreset(
+            preset,
+            (pct) => {
+              if (progressBar) progressBar.style.width = `${pct}%`;
+            },
+            () => {
+              resetBtnUI(btn);
+              if (activeButton === btn) {
+                activeButton = null;
+                activeCleanup = null;
+              }
+            }
+          );
+        }
+      });
     });
-  });
+  }
+
+  setupAudioDemos();
+  document.addEventListener('astro:page-load', setupAudioDemos);
+  document.addEventListener('astro:before-preparation', stopActiveAudioDemo);
 </script>
 

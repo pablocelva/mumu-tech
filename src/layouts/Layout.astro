@@ -1,4 +1,6 @@
 ---
+import { ClientRouter } from 'astro:transitions';
+import type { TransitionDirectionalAnimations } from 'astro';
 import SEO from '../components/SEO.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
@@ -23,10 +25,49 @@ const {
   hideHeader = false,
   hideFooter = false,
 } = Astro.props;
+
+const isAdminRoute = Astro.url.pathname.startsWith('/admin');
+
+const mainStageTransition: TransitionDirectionalAnimations = {
+  forwards: {
+    old: {
+      name: 'mumuStageOutFwd',
+      duration: '150ms',
+      easing: 'cubic-bezier(0.4, 0, 1, 1)',
+      fillMode: 'both',
+    },
+    new: {
+      name: 'mumuStageInFwd',
+      duration: '280ms',
+      delay: '55ms',
+      easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+      fillMode: 'both',
+    },
+  },
+  backwards: {
+    old: {
+      name: 'mumuStageOutBack',
+      duration: '150ms',
+      easing: 'cubic-bezier(0.4, 0, 1, 1)',
+      fillMode: 'both',
+    },
+    new: {
+      name: 'mumuStageInBack',
+      duration: '280ms',
+      delay: '55ms',
+      easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+      fillMode: 'both',
+    },
+  },
+};
 ---
 
 <!doctype html>
-<html lang="es">
+<html
+  lang="es"
+  transition:name={isAdminRoute ? undefined : 'root'}
+  transition:animate={isAdminRoute ? undefined : mainStageTransition}
+>
   <head>
     <SEO
       title={title}
@@ -38,18 +79,110 @@ const {
       robots={robots}
       structuredData={structuredData}
     />
+    {!isAdminRoute && <ClientRouter fallback="animate" />}
   </head>
   <body>
     <!-- Retro Analog Glitch & Chromatic Background Layer -->
-    <div class="lofi-background" aria-hidden="true"></div>
-    <div class="lofi-overlay" aria-hidden="true"></div>
+    <div
+      class="lofi-background"
+      aria-hidden="true"
+      transition:persist="lofi-bg"
+    ></div>
+    <div
+      class="lofi-overlay"
+      aria-hidden="true"
+      transition:persist="lofi-overlay"
+    ></div>
 
     {!hideHeader && <Header />}
 
-    <main id="main-content" style="flex: 1; display: flex; flex-direction: column;">
+    <main id="main-content" tabindex="-1" style="flex: 1; display: flex; flex-direction: column; outline: none;">
       <slot />
     </main>
 
     {!hideFooter && <Footer />}
+
+    {!isAdminRoute && (
+      <script>
+        // Evita que ClientRouter desmonte y re-parsee <style data-vite-dev-id> (global.css, CSS Modules)
+        // en cada swap, eliminando recálculos de estilos a mitad de la animación.
+        document.addEventListener('astro:before-swap', (event) => {
+          document.head
+            .querySelectorAll<HTMLStyleElement>('style[data-vite-dev-id]')
+            .forEach((liveStyle) => {
+              const viteId = liveStyle.dataset.viteDevId;
+              if (!viteId) return;
+              const persistKey = `vite-css-${viteId}`;
+              const incomingStyle = Array.from(
+                event.newDocument.head.querySelectorAll<HTMLStyleElement>('style[data-vite-dev-id]')
+              ).find((s) => s.dataset.viteDevId === viteId);
+
+              if (incomingStyle) {
+                liveStyle.setAttribute('data-astro-transition-persist', persistKey);
+                incomingStyle.setAttribute('data-astro-transition-persist', persistKey);
+              } else if (viteId.endsWith('.module.css')) {
+                liveStyle.setAttribute('data-astro-transition-persist', persistKey);
+                const placeholder = liveStyle.cloneNode(true) as HTMLStyleElement;
+                placeholder.setAttribute('data-astro-transition-persist', persistKey);
+                event.newDocument.head.appendChild(placeholder);
+              }
+            });
+        });
+
+        document.addEventListener('astro:after-swap', () => {
+          if (!document.activeElement || document.activeElement === document.body) {
+            document.getElementById('main-content')?.focus({ preventScroll: true });
+          }
+        });
+
+        document.addEventListener('astro:before-preparation', (event) => {
+          const originalLoader = event.loader;
+          event.loader = async () => {
+            await originalLoader();
+            const doc = event.newDocument;
+            if (!doc) return;
+
+            if (import.meta.env.DEV) {
+              const cssModuleScripts = Array.from(
+                doc.head.querySelectorAll<HTMLScriptElement>('script[type="module"][src*=".module.css"]')
+              );
+              if (cssModuleScripts.length > 0) {
+                await Promise.all(
+                  cssModuleScripts.map((s) => {
+                    const src = s.getAttribute('src');
+                    return src ? import(/* @vite-ignore */ src).catch(() => {}) : Promise.resolve();
+                  })
+                );
+              }
+            }
+
+            const criticalImgs = Array.from(
+              doc.querySelectorAll<HTMLImageElement>(
+                'img[fetchpriority="high"], img[data-astro-transition-scope], img:not([loading="lazy"])'
+              )
+            ).slice(0, 4);
+
+            if (criticalImgs.length === 0) {
+              await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+              return;
+            }
+
+            const decodeTasks = criticalImgs.map((img) => {
+              const src = img.getAttribute('src');
+              if (!src) return Promise.resolve();
+              const preImg = new Image();
+              preImg.src = src;
+              return typeof preImg.decode === 'function'
+                ? preImg.decode().catch(() => {})
+                : Promise.resolve();
+            });
+            await Promise.race([
+              Promise.all(decodeTasks),
+              new Promise((resolve) => setTimeout(resolve, 140)),
+            ]);
+          };
+        });
+      </script>
+    )}
   </body>
 </html>

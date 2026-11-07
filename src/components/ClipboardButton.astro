@@ -23,7 +23,11 @@ const {
 const buttonId = `clipboard-btn-${Math.random().toString(36).substring(2, 8)}`;
 ---
 
-<div class:list={[styles.wrapper, { [styles.wrapperFullWidth]: fullWidth }]}>
+<div
+  class:list={[styles.wrapper, { [styles.wrapperFullWidth]: fullWidth }]}
+  data-clipboard-root
+  data-visible-class={styles.visible}
+>
   <Button
     type="button"
     id={buttonId}
@@ -31,6 +35,7 @@ const buttonId = `clipboard-btn-${Math.random().toString(36).substring(2, 8)}`;
     size={size}
     fullWidth={fullWidth}
     data-copy={textToCopy}
+    data-clipboard-btn
     aria-label={`${label}: ${textToCopy}`}
   >
     <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true" style="flex-shrink: 0; margin-right: 0.35rem;">
@@ -38,19 +43,26 @@ const buttonId = `clipboard-btn-${Math.random().toString(36).substring(2, 8)}`;
     </svg>
     <span>{label}</span>
   </Button>
-  <span id={`${buttonId}-tooltip`} class={styles.tooltip} role="status" aria-live="polite">
+  <span id={`${buttonId}-tooltip`} class={styles.tooltip} data-clipboard-tooltip role="status" aria-live="polite">
     {successMessage}
   </span>
 </div>
 
-<script define:vars={{ buttonId }}>
-  const btn = document.getElementById(buttonId);
-  const tooltip = document.getElementById(`${buttonId}-tooltip`);
+<script>
+  function setupClipboardButtons() {
+    document.querySelectorAll<HTMLElement>('[data-clipboard-root]').forEach((root) => {
+      if (root.dataset.bound === 'true') return;
+      root.dataset.bound = 'true';
 
-  if (btn && tooltip) {
-    btn.addEventListener('click', async () => {
-      const text = btn.getAttribute('data-copy');
-      if (text) {
+      const btn = root.querySelector<HTMLButtonElement>('[data-clipboard-btn]');
+      const tooltip = root.querySelector<HTMLElement>('[data-clipboard-tooltip]');
+      const visibleClass = root.dataset.visibleClass || 'visible';
+
+      if (!btn || !tooltip) return;
+
+      btn.addEventListener('click', async () => {
+        const text = btn.getAttribute('data-copy');
+        if (!text) return;
         try {
           if (navigator.clipboard) {
             await navigator.clipboard.writeText(text);
@@ -62,14 +74,17 @@ const buttonId = `clipboard-btn-${Math.random().toString(36).substring(2, 8)}`;
             document.execCommand('copy');
             document.body.removeChild(textarea);
           }
-          tooltip.classList.add(styles.visible || 'visible');
+          tooltip.classList.add(visibleClass);
           setTimeout(() => {
-            tooltip.classList.remove(styles.visible || 'visible');
+            tooltip.classList.remove(visibleClass);
           }, 2500);
         } catch (err) {
           console.error('Copy failed:', err);
         }
-      }
+      });
     });
   }
+
+  setupClipboardButtons();
+  document.addEventListener('astro:page-load', setupClipboardButtons);
 </script>

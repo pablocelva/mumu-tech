@@ -31,4 +31,17 @@ describe('Cloudinary Lib Unit Tests', () => {
     expect(result).toContain('pedal_fuzz_nos');
     expect(result).toContain('w_400');
   });
+
+  it('should optimize Unsplash image URLs when width is specified', () => {
+    const unsplashWithParams = 'https://images.unsplash.com/photo-1751887687425?w=1170&q=80';
+    const resized = getOptimizedImageUrl(unsplashWithParams, { width: 640 });
+    expect(resized).toContain('w=640');
+    expect(resized).toContain('auto=format');
+
+    const unsplashBare = 'https://plus.unsplash.com/premium_photo-1663040598592';
+    const bareResized = getOptimizedImageUrl(unsplashBare, { width: 800 });
+    expect(bareResized).toContain('w=800');
+    expect(bareResized).toContain('auto=format');
+    expect(bareResized).toContain('q=75');
+  });
 });

@@ -234,84 +234,89 @@ const dates =
     }
   };
 
-  const forms = document.querySelectorAll<HTMLFormElement>('form[data-workshop-reg-form]');
-  forms.forEach((form) => {
-    if (form.dataset.bound === 'true') return;
-    form.dataset.bound = 'true';
+  function setupWorkshopRegForms() {
+    const forms = document.querySelectorAll<HTMLFormElement>('form[data-workshop-reg-form]');
+    forms.forEach((form) => {
+      if (form.dataset.bound === 'true') return;
+      form.dataset.bound = 'true';
 
-    initUserInvalidFallback(form);
-    form.addEventListener('blur', (e) => syncAriaInvalid(e.target), true);
-    form.addEventListener('input', (e) => {
-      if (e.target instanceof HTMLElement && e.target.hasAttribute('aria-invalid')) {
-        syncAriaInvalid(e.target);
-      }
-    });
+      initUserInvalidFallback(form);
+      form.addEventListener('blur', (e) => syncAriaInvalid(e.target), true);
+      form.addEventListener('input', (e) => {
+        if (e.target instanceof HTMLElement && e.target.hasAttribute('aria-invalid')) {
+          syncAriaInvalid(e.target);
+        }
+      });
 
-    const statusEl = form.querySelector<HTMLElement>('[data-reg-status]');
-    const submitBtn = form.querySelector<HTMLButtonElement>('[data-reg-submit]');
+      const statusEl = form.querySelector<HTMLElement>('[data-reg-status]');
+      const submitBtn = form.querySelector<HTMLButtonElement>('[data-reg-submit]');
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-      if (!form.checkValidity()) {
-        form.reportValidity();
-        return;
-      }
+        if (!form.checkValidity()) {
+          form.reportValidity();
+          return;
+        }
 
-      if (!statusEl || !submitBtn) return;
+        if (!statusEl || !submitBtn) return;
 
-      const originalLabel = submitBtn.textContent || 'INSCRIBIRME AL TALLER';
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'PROCESANDO INSCRIPCIÓN...';
-      statusEl.style.display = 'none';
-      statusEl.textContent = '';
+        const originalLabel = submitBtn.textContent || 'INSCRIBIRME AL TALLER';
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'PROCESANDO INSCRIPCIÓN...';
+        statusEl.style.display = 'none';
+        statusEl.textContent = '';
 
-      const fd = new FormData(form);
-      const rawDate = String(fd.get('selectedDate') || '');
-      const [selectedDateIso = '', selectedDateLabel = ''] = rawDate.split('||');
+        const fd = new FormData(form);
+        const rawDate = String(fd.get('selectedDate') || '');
+        const [selectedDateIso = '', selectedDateLabel = ''] = rawDate.split('||');
 
-      const payload = {
-        workshopId: String(fd.get('workshopId') || ''),
-        workshopSlug: String(fd.get('workshopSlug') || ''),
-        workshopTitle: String(fd.get('workshopTitle') || ''),
-        selectedDateIso,
-        selectedDateLabel,
-        name: String(fd.get('name') || ''),
-        email: String(fd.get('email') || ''),
-        phone: String(fd.get('phone') || ''),
-        subscribeNewsletter: fd.get('subscribeNewsletter') === 'true',
-        website: String(fd.get('website') || ''),
-      };
+        const payload = {
+          workshopId: String(fd.get('workshopId') || ''),
+          workshopSlug: String(fd.get('workshopSlug') || ''),
+          workshopTitle: String(fd.get('workshopTitle') || ''),
+          selectedDateIso,
+          selectedDateLabel,
+          name: String(fd.get('name') || ''),
+          email: String(fd.get('email') || ''),
+          phone: String(fd.get('phone') || ''),
+          subscribeNewsletter: fd.get('subscribeNewsletter') === 'true',
+          website: String(fd.get('website') || ''),
+        };
 
-      try {
-        const res = await fetch('/api/workshop-register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-        const result = await res.json();
+        try {
+          const res = await fetch('/api/workshop-register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+          const result = await res.json();
 
-        if (res.ok && result.success) {
-          statusEl.style.cssText =
-            'display:block;background:rgba(57,255,20,0.14);border:1px solid #39ff14;color:#9cff89;padding:0.9rem 1rem;border-radius:2px;font-family:monospace;';
-          statusEl.textContent = '✓ ' + (result.message || '¡Inscripción registrada con éxito!');
-          form.reset();
-        } else {
+          if (res.ok && result.success) {
+            statusEl.style.cssText =
+              'display:block;background:rgba(57,255,20,0.14);border:1px solid #39ff14;color:#9cff89;padding:0.9rem 1rem;border-radius:2px;font-family:monospace;';
+            statusEl.textContent = '✓ ' + (result.message || '¡Inscripción registrada con éxito!');
+            form.reset();
+          } else {
+            statusEl.style.cssText =
+              'display:block;background:rgba(255,42,133,0.15);border:1px solid #ff2a85;color:#ff9ec7;padding:0.9rem 1rem;border-radius:2px;font-family:monospace;';
+            statusEl.textContent =
+              '⚠ ' + (result.error || 'Revisa los campos obligatorios e intenta nuevamente.');
+          }
+        } catch {
           statusEl.style.cssText =
             'display:block;background:rgba(255,42,133,0.15);border:1px solid #ff2a85;color:#ff9ec7;padding:0.9rem 1rem;border-radius:2px;font-family:monospace;';
-          statusEl.textContent =
-            '⚠ ' + (result.error || 'Revisa los campos obligatorios e intenta nuevamente.');
+          statusEl.textContent = '⚠ Error de conexión. Intenta nuevamente en unos segundos.';
+        } finally {
+          void statusClasses;
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalLabel;
         }
-      } catch {
-        statusEl.style.cssText =
-          'display:block;background:rgba(255,42,133,0.15);border:1px solid #ff2a85;color:#ff9ec7;padding:0.9rem 1rem;border-radius:2px;font-family:monospace;';
-        statusEl.textContent = '⚠ Error de conexión. Intenta nuevamente en unos segundos.';
-      } finally {
-        void statusClasses;
-        submitBtn.disabled = false;
-        submitBtn.textContent = originalLabel;
-      }
+      });
     });
-  });
+  }
+
+  setupWorkshopRegForms();
+  document.addEventListener('astro:page-load', setupWorkshopRegForms);
 </script>
 

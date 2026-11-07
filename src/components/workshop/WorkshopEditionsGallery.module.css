@@ -1,5 +1,7 @@
 .section {
   margin-top: 3.5rem;
+  content-visibility: auto;
+  contain-intrinsic-size: auto none auto 520px;
 }
 
 .headerBlock {

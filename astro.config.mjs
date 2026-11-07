@@ -13,5 +13,8 @@ export default defineConfig({
       filter: (page) => !page.endsWith('/404') && !page.endsWith('/404/') && !page.includes('/admin'),
     }),
   ],
+  prefetch: {
+    defaultStrategy: 'hover',
+  },
   scopedStyleStrategy: 'where',
 });

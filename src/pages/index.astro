@@ -4,11 +4,7 @@ import SectionHeader from '../components/SectionHeader.astro';
 import Button from '../components/Button.astro';
 import Badge from '../components/Badge.astro';
 import NewsletterForm from '../components/NewsletterForm.astro';
-import { contentRepository } from '../repositories/content.repository';
-
-const featuredWorkshops = await contentRepository.getItemsByCategory('educativa');
-const featuredServices = await contentRepository.getItemsByCategory('servicios');
-const featuredProjects = await contentRepository.getItemsByCategory('cosas-interesantes');
+import { getOptimizedImageUrl } from '../lib/cloudinary';
 
 const sectionsOverview = [
   {
@@ -82,15 +78,16 @@ const sectionsOverview = [
       </div>
 
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
-        {sectionsOverview.map((sec) => (
-          <article style="background: rgba(18, 18, 26, 0.82); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 2px; overflow: hidden; display: flex; flex-direction: column; transition: all 0.2s ease; box-shadow: 0 8px 30px rgba(0,0,0,0.4);">
+        {sectionsOverview.map((sec, idx) => (
+          <article style="background: rgba(18, 18, 26, 0.82); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 2px; overflow: hidden; display: flex; flex-direction: column; transition: transform 0.2s ease, border-color 0.2s ease; box-shadow: 0 8px 30px rgba(0,0,0,0.4);">
             <div style="height: 200px; overflow: hidden; background: #000;">
               <img
-                src={sec.imageUrl}
+                src={getOptimizedImageUrl(sec.imageUrl, { width: 640 })}
                 alt={sec.imageAlt}
-                loading="lazy"
-                width="800"
-                height="450"
+                loading={idx === 0 ? undefined : 'lazy'}
+                fetchpriority={idx === 0 ? 'high' : undefined}
+                width="640"
+                height="360"
                 style="width: 100%; height: 100%; object-fit: cover; filter: contrast(105%) brightness(95%);"
                 onerror="this.onerror=null; this.src='/images/placeholder.svg';"
               />

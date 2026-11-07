@@ -98,11 +98,14 @@ const { initialInterest = 'taller' } = Astro.props;
 </form>
 
 <script>
-  const form = document.getElementById('contact-form') as HTMLFormElement | null;
-  const statusDiv = document.getElementById('form-status');
-  const submitBtn = document.getElementById('submit-btn');
+  function setupContactForm() {
+    const form = document.getElementById('contact-form') as HTMLFormElement | null;
+    const statusDiv = document.getElementById('form-status');
+    const submitBtn = document.getElementById('submit-btn');
 
-  if (form && statusDiv && submitBtn) {
+    if (!form || !statusDiv || !submitBtn || form.dataset.bound === 'true') return;
+    form.dataset.bound = 'true';
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -146,7 +149,7 @@ const { initialInterest = 'taller' } = Astro.props;
           statusDiv.style.cssText = 'display: block; background: rgba(255, 42, 133, 0.15); border: 1px solid #ff2a85; color: #ff94c2; padding: 1rem; margin-bottom: 1rem; border-radius: 2px; font-family: monospace;';
           statusDiv.textContent = '⚠ ' + (result.error || 'Hubo un error al procesar el envío. Revisa los datos.');
         }
-      } catch (err) {
+      } catch {
         statusDiv.style.cssText = 'display: block; background: rgba(255, 42, 133, 0.15); border: 1px solid #ff2a85; color: #ff94c2; padding: 1rem; margin-bottom: 1rem; border-radius: 2px; font-family: monospace;';
         statusDiv.textContent = '⚠ Error de conexión. Intenta nuevamente o contáctame por WhatsApp.';
       } finally {
@@ -155,4 +158,7 @@ const { initialInterest = 'taller' } = Astro.props;
       }
     });
   }
+
+  setupContactForm();
+  document.addEventListener('astro:page-load', setupContactForm);
 </script>

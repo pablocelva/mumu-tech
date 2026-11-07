@@ -42,13 +42,13 @@ export const INITIAL_WORKSHOPS: WorkshopItem[] = [
     summary: 'Arma el circuito Electra Distortion desde cero, analízalo y aprende distintos acercamientos a la construcción de pedales. Pensado para personas sin conocimientos previos o iniciándose en la electrónica.',
     description: [
       'El taller consistirá en armar el circuito Electra Distortion, analizarlo y aprender distintos acercamientos a la construcción de pedales.',
-      'Incluye todos los componentes necesarios para armar el pedal y una caja metálica ya perforada; dependiendo de la selección de componentes puede ir desde un overdrive a un fuzz cochinón.',
+      'Incluye todos los componentes necesarios para armar el pedal y una caja metálica ya perforada; dependiendo de la selección de componentes puede ir desde un overdrive a un fuzz.',
       'Está pensado para personas sin conocimientos o iniciándose en la electrónica: la idea es empezar con este circuito relativamente simple para después abordar proyectos más complejos en el futuro.',
     ],
     hours: 'Sábados de 10:00 a 15:00 hrs',
     place: 'Providencia, Santiago',
     category: 'educativa',
-    imageUrl: '/images/taller-electra-dist.png',
+    imageUrl: '/images/taller-electra-dist.webp',
     imageAlt: 'Pedal Electra Distortion en caja metálica con perilla azul, LED rojo encendido, placa perforada y componentes electrónicos',
     tags: ['Electra Distortion', 'Pedales DIY', 'Nivel Inicial'],
     featured: true,
@@ -145,7 +145,7 @@ export const INITIAL_WORKSHOPS: WorkshopItem[] = [
         summary: 'Jornada presencial de construcción del pedal Electra Distortion en caja metálica perforada.',
         photos: [
           {
-            url: '/images/taller-electra-dist.png',
+            url: '/images/taller-electra-dist.webp',
             alt: 'Pedal Electra Distortion armado en caja metálica junto a placa perforada, potenciómetro y perillas de colores',
             caption: 'Pedal Electra Distortion terminado en gabinete de aluminio junto a su placa perforada, potenciómetro y perillas.',
           },
@@ -179,7 +179,7 @@ export const INITIAL_WORKSHOPS: WorkshopItem[] = [
     hours: 'Sábados de 10:00 a 15:00 hrs',
     place: 'Providencia, Santiago',
     category: 'educativa',
-    imageUrl: '/images/taller-fuzz-face.png',
+    imageUrl: '/images/taller-fuzz-face.webp',
     imageAlt: 'Pedal Fuzz Face terminado en caja metálica con dos perillas negras, footswitch, LED verde y cables conectados',
     tags: ['Fuzz Face', 'Pedales DIY', 'Nivel Intermedio'],
     featured: true,
@@ -260,7 +260,7 @@ export const INITIAL_WORKSHOPS: WorkshopItem[] = [
         summary: 'Sesión de armado, calibración de bias y pruebas de modificación sobre el circuito Fuzz Face.',
         photos: [
           {
-            url: '/images/taller-fuzz-face.png',
+            url: '/images/taller-fuzz-face.webp',
             alt: 'Pedal Fuzz Face en gabinete de aluminio con dos perillas negras, LED verde y cables conectados',
             caption: 'Pedal Fuzz Face terminado en caja metálica con controles de Volumen y Fuzz conectados sobre mesa de corte.',
           },

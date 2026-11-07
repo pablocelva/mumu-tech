@@ -157,8 +157,11 @@ const flattenedPhotos = editions.flatMap((edition) =>
 )}
 
 <script>
-  const root = document.querySelector<HTMLElement>('[data-editions-gallery]');
-  if (root) {
+  function setupEditionsGallery() {
+    const root = document.querySelector<HTMLElement>('[data-editions-gallery]');
+    if (!root || root.dataset.bound === 'true') return;
+    root.dataset.bound = 'true';
+
     const filterBtns = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-edition-filter]'));
     const summaryCards = Array.from(root.querySelectorAll<HTMLElement>('[data-edition-summary]'));
     const photoBtns = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-gallery-item]'));
@@ -254,5 +257,8 @@ const flattenedPhotos = editions.flatMap((edition) =>
       });
     }
   }
+
+  setupEditionsGallery();
+  document.addEventListener('astro:page-load', setupEditionsGallery);
 </script>
 

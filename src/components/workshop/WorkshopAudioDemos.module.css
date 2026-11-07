@@ -1,5 +1,7 @@
 .section {
   margin-top: 3rem;
+  content-visibility: auto;
+  contain-intrinsic-size: auto none auto 220px;
 }
 
 .headerRow {

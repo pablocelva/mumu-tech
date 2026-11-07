@@ -32,7 +32,7 @@
 
 html {
   font-family: var(--font-body);
-  background-color: var(--color-bg);
+  background-color: #140b24;
   color: var(--color-text-main);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
@@ -59,6 +59,9 @@ body {
   width: 110%;
   height: 110%;
   z-index: -2;
+  contain: layout style;
+  transform: translateZ(0);
+  backface-visibility: hidden;
   background: 
     radial-gradient(circle at 10% 20%, rgba(255, 42, 133, 0.85) 0%, transparent 45%),
     radial-gradient(circle at 90% 15%, rgba(0, 240, 255, 0.8) 0%, transparent 40%),
@@ -70,6 +73,12 @@ body {
   pointer-events: none;
 }
 
+@media (max-width: 768px) {
+  .lofi-background {
+    filter: contrast(112%) saturate(135%) blur(22px);
+  }
+}
+
 /* CRT Scanline & Grain Texture Overlay */
 .lofi-overlay {
   position: fixed;
@@ -77,6 +86,7 @@ body {
   width: 100%;
   height: 100%;
   z-index: -1;
+  contain: layout style;
   pointer-events: none;
   background: 
     linear-gradient(rgba(18, 16, 26, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
@@ -144,4 +154,111 @@ button, input, textarea, select {
   background: rgba(255, 255, 255, 0.2);
   border: none;
   margin: 2.5rem 0;
+}
+
+html[data-astro-transition] {
+  scroll-behavior: auto !important;
+}
+
+/* Subtle Page View Transitions (always-matched native `root` viewport fast-path) */
+::view-transition {
+  background:
+    radial-gradient(circle at 10% 20%, rgba(255, 42, 133, 0.58) 0%, transparent 56%),
+    radial-gradient(circle at 90% 15%, rgba(0, 240, 255, 0.52) 0%, transparent 52%),
+    radial-gradient(circle at 50% 50%, rgba(157, 78, 221, 0.55) 0%, transparent 60%),
+    radial-gradient(circle at 20% 85%, rgba(57, 255, 20, 0.45) 0%, transparent 52%),
+    radial-gradient(circle at 80% 85%, rgba(255, 42, 133, 0.52) 0%, transparent 56%),
+    linear-gradient(135deg, #1b092b 0%, #0d1b2a 50%, #2a0845 100%);
+}
+
+::view-transition-group(site-header) {
+  z-index: 50;
+  animation: none;
+}
+
+::view-transition-old(site-header) {
+  animation: 335ms cubic-bezier(0.45, 0, 0.55, 1) both mumuHeaderOut;
+  mix-blend-mode: plus-lighter;
+}
+
+::view-transition-new(site-header) {
+  animation: 335ms cubic-bezier(0.45, 0, 0.55, 1) both mumuHeaderIn;
+  mix-blend-mode: plus-lighter;
+}
+
+/* Curva aditiva suave: suma 1.00 en 0% -> pico atenuado 1.18 en 45% -> 1.00 en 100% (cero salto/parpadeo) */
+@keyframes mumuHeaderOut {
+  0% {
+    opacity: 1;
+  }
+  45% {
+    opacity: 0.59;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes mumuHeaderIn {
+  0% {
+    opacity: 0;
+  }
+  45% {
+    opacity: 0.59;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes mumuStageOutFwd {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, -10px, 0);
+  }
+}
+
+@keyframes mumuStageInFwd {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes mumuStageOutBack {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+}
+
+@keyframes mumuStageInBack {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -12px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
 }
