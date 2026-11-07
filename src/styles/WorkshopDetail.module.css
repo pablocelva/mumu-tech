@@ -151,6 +151,55 @@
   line-height: 1.7;
 }
 
+.descriptionList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.descriptionItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  font-size: 0.96rem;
+  color: var(--color-text-muted);
+  line-height: 1.65;
+}
+
+.descriptionBullet {
+  color: var(--color-accent-cyan);
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  line-height: 1.65;
+  flex-shrink: 0;
+}
+
+.noRefundNote {
+  margin-top: -0.5rem;
+  padding: 0.65rem 0.95rem;
+  background: rgba(255, 190, 11, 0.12);
+  border: 1px solid rgba(255, 209, 102, 0.48);
+  border-left: 3px solid #ffd166;
+  border-radius: 2px;
+  color: #ffd166;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.45;
+}
+
+@media (forced-colors: active) {
+  .noRefundNote {
+    border: 1px solid Highlight;
+    border-left-width: 4px;
+    color: CanvasText;
+  }
+}
+
 /* Mobile & Tablet Registration Modal (<dialog>) */
 .regDialog {
   margin: auto;

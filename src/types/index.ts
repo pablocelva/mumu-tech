@@ -7,13 +7,15 @@ export interface SectionContent {
   updatedAt: string;
 }
 
+export type ItemDescription = string | string[];
+
 export interface BaseItem {
   id: string;
   code: string; // e.g. "001", "002"
   title: string;
   slug: string;
   summary: string;
-  description: string;
+  description: ItemDescription;
   category: ContentCategory;
   imageUrl: string;
   imageAlt: string;
@@ -75,6 +77,8 @@ export interface WorkshopPastEdition {
 
 export interface WorkshopItem extends BaseItem {
   category: 'educativa';
+  hours?: string;
+  place?: string;
   durationHours?: number;
   level?: 'Principiante' | 'Intermedio' | 'Avanzado';
   materialsIncluded?: boolean;

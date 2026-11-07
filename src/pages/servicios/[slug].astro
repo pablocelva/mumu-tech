@@ -43,6 +43,7 @@ const mobileModalCta = isMod
   title={service ? `${service.title} | Servicios Mumu Tech` : 'Servicio no encontrado | Mumu Tech'}
   description={service ? service.summary : 'El servicio solicitado no se encuentra disponible.'}
   image={service ? heroImg : undefined}
+  robots={!service ? 'noindex, nofollow' : undefined}
 >
   <div class={`container ${styles.pageWrapper}`}>
     <div class={styles.backLinkRow}>

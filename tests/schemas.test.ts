@@ -38,6 +38,43 @@ describe('Zod Schemas Validation Suite', () => {
       expect(result.success).toBe(true);
     });
 
+    it('should validate workshop description as variable-length list of points plus hours and place', () => {
+      const twoPointsWorkshop = {
+        id: 'ws-points-2',
+        code: '102',
+        title: 'Taller Pedales Inicial',
+        slug: 'taller-pedales-inicial',
+        summary: 'Construye tu primer circuito analógico desde cero.',
+        description: [
+          'Armado paso a paso del circuito en placa perforada.',
+          'Incluye todos los componentes y gabinete metálico perforado.',
+        ],
+        hours: 'Sábados de 10:00 a 15:00 hrs',
+        place: 'Providencia, Santiago',
+        category: 'educativa',
+        imageUrl: '/images/taller-electra-dist.png',
+        imageAlt: 'Pedal DIY en caja metálica',
+      };
+      expect(WorkshopSchema.safeParse(twoPointsWorkshop).success).toBe(true);
+
+      const fourPointsWorkshop = {
+        ...twoPointsWorkshop,
+        description: [
+          'Punto 1 sobre el circuito.',
+          'Punto 2 sobre materiales incluidos.',
+          'Punto 3 sobre requisitos previos.',
+          'Punto 4 sobre pruebas finales en amplificador.',
+        ],
+      };
+      expect(WorkshopSchema.safeParse(fourPointsWorkshop).success).toBe(true);
+
+      const emptyListWorkshop = {
+        ...twoPointsWorkshop,
+        description: [],
+      };
+      expect(WorkshopSchema.safeParse(emptyListWorkshop).success).toBe(false);
+    });
+
     it('should fail when code is not 3 digits', () => {
       const invalidWorkshop = {
         id: 'ws-test',

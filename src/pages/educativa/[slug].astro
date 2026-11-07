@@ -37,6 +37,7 @@ const formattedPrice =
   title={workshop ? `${workshop.title} | Talleres Mumu Tech` : 'Taller no encontrado | Mumu Tech'}
   description={workshop ? workshop.summary : 'El taller solicitado no se encuentra disponible.'}
   image={workshop ? heroImg : undefined}
+  robots={!workshop ? 'noindex, nofollow' : undefined}
 >
   <div class={`container ${styles.pageWrapper}`}>
     <div class={styles.backLinkRow}>
@@ -82,8 +83,13 @@ const formattedPrice =
             <div class={styles.titleBlock}>
               <h1 class={styles.title}>{workshop.title}</h1>
               <div class={styles.specsRow}>
-                <span class={`${styles.specBadge} ${styles.specPrice}`}>{formattedPrice}</span>
-                {workshop.durationHours && (
+                {workshop.place && (
+                  <span class={styles.specBadge}>📍 {workshop.place.toUpperCase()}</span>
+                )}
+                {workshop.hours && (
+                  <span class={styles.specBadge}>🗓 {workshop.hours.toUpperCase()}</span>
+                )}
+                {workshop.durationHours && !workshop.hours && (
                   <span class={styles.specBadge}>⏱ {workshop.durationHours} HORAS</span>
                 )}
                 {workshop.level && (
@@ -95,6 +101,7 @@ const formattedPrice =
                 {workshop.materialsIncluded && (
                   <span class={styles.specBadge}>🔧 MATERIALES INCLUIDOS</span>
                 )}
+                <span class={`${styles.specBadge} ${styles.specPrice}`}>{formattedPrice}</span>
               </div>
             </div>
 
@@ -111,7 +118,19 @@ const formattedPrice =
               </Button>
             </div>
 
-            <p class={styles.descriptionText}>{workshop.description}</p>
+            {Array.isArray(workshop.description) ? (
+              <ul class={styles.descriptionList} role="list">
+                {workshop.description.map((point) => (
+                  <li class={styles.descriptionItem}>
+                    <span class={styles.descriptionBullet} aria-hidden="true">▸</span>
+                    <span>{point}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p class={styles.descriptionText}>{workshop.description}</p>
+            )}
+            <p class={styles.noRefundNote}>* No se hacen devoluciones *</p>
           </article>
         </div>
 

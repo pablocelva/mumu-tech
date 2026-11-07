@@ -378,8 +378,19 @@ const sectionLabels: Record<string, { label: string; route: string; variant: 'pi
       </div>
 
       <div>
-        <label for="create-description" style="font-family: var(--font-mono); font-size: 0.8rem; color: #a0a0b5;">DESCRIPCIÓN COMPLETA</label>
-        <textarea id="create-description" name="description" required rows="3" placeholder="Detalles técnicos, materiales, circuito..." style="width: 100%; padding: 0.6rem; background: #08080c; border: 1px solid #333; color: #fff;"></textarea>
+        <label for="create-description" style="font-family: var(--font-mono); font-size: 0.8rem; color: #a0a0b5;">DESCRIPCIÓN COMPLETA (UN PÁRRAFO O UN PUNTO POR LÍNEA)</label>
+        <textarea id="create-description" name="description" required rows="4" placeholder="Escribe un párrafo continuo o separa cada punto en una línea nueva..." style="width: 100%; padding: 0.6rem; background: #08080c; border: 1px solid #333; color: #fff;"></textarea>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div>
+          <label for="create-hours" style="font-family: var(--font-mono); font-size: 0.8rem; color: #a0a0b5;">HORARIO (OPCIONAL · SOLO TALLERES)</label>
+          <input id="create-hours" type="text" name="hours" placeholder="Ej: Sábados de 10:00 a 15:00 hrs" style="width: 100%; padding: 0.6rem; background: #08080c; border: 1px solid #333; color: #fff;" />
+        </div>
+        <div>
+          <label for="create-place" style="font-family: var(--font-mono); font-size: 0.8rem; color: #a0a0b5;">LUGAR (OPCIONAL · SOLO TALLERES)</label>
+          <input id="create-place" type="text" name="place" placeholder="Ej: Providencia, Santiago" style="width: 100%; padding: 0.6rem; background: #08080c; border: 1px solid #333; color: #fff;" />
+        </div>
       </div>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
@@ -552,20 +563,36 @@ const sectionLabels: Record<string, { label: string; route: string; variant: 'pi
       const title = formData.get('title') as string;
       const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
-      const payload = {
+      const rawDesc = String(formData.get('description') || '').trim();
+      const descLines = rawDesc
+        .split(/\r?\n/)
+        .map((line) => line.replace(/^\s*[-•*]\s*/, '').trim())
+        .filter(Boolean);
+      const descriptionPayload = descLines.length > 1 ? descLines : rawDesc;
+
+      const category = String(formData.get('category') || 'educativa');
+      const hours = String(formData.get('hours') || '').trim();
+      const place = String(formData.get('place') || '').trim();
+
+      const payload: Record<string, unknown> = {
         id: `item-${Date.now()}`,
         code: formData.get('code'),
         title: title,
         slug: slug || `item-${Date.now()}`,
         summary: formData.get('summary'),
-        description: formData.get('description'),
-        category: formData.get('category'),
+        description: descriptionPayload,
+        category,
         imageUrl: formData.get('imageUrl'),
         imageAlt: formData.get('imageAlt'),
         tags: tags,
         featured: formData.get('published') === 'true',
         published: formData.get('published') === 'true',
       };
+
+      if (category === 'educativa') {
+        if (hours) payload.hours = hours;
+        if (place) payload.place = place;
+      }
 
       try {
         const res = await fetch('/api/content', {

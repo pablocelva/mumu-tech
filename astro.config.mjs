@@ -8,6 +8,10 @@ export default defineConfig({
   site: 'https://mumutech.netlify.app',
   output: 'server',
   adapter: netlify({ imageCDN: false }),
-  integrations: [sitemap()],
+  integrations: [
+    sitemap({
+      filter: (page) => !page.endsWith('/404') && !page.endsWith('/404/') && !page.includes('/admin'),
+    }),
+  ],
   scopedStyleStrategy: 'where',
 });

@@ -40,7 +40,13 @@ export const INITIAL_WORKSHOPS: WorkshopItem[] = [
     title: 'TALLER INICIAL DE FABRICACIÓN DE PEDALES',
     slug: 'taller-inicial-fabricacion-pedales',
     summary: 'Arma el circuito Electra Distortion desde cero, analízalo y aprende distintos acercamientos a la construcción de pedales. Pensado para personas sin conocimientos previos o iniciándose en la electrónica.',
-    description: 'El taller consistirá en armar el circuito Electra Distortion, analizarlo y aprender distintos acercamientos a la construcción de pedales. El valor es de $55.000 y se realiza en Santiago, comuna de Providencia, los días sábado de 10:00 a 15:00 hrs. Incluye todos los componentes necesarios para armar el pedal y una caja metálica ya perforada; dependiendo de la selección de componentes puede ir desde un overdrive a un fuzz cochinón. Está pensado para personas sin conocimientos o iniciándose en la electrónica: la idea es empezar con este circuito relativamente simple para después abordar proyectos más complejos en el futuro.',
+    description: [
+      'El taller consistirá en armar el circuito Electra Distortion, analizarlo y aprender distintos acercamientos a la construcción de pedales.',
+      'Incluye todos los componentes necesarios para armar el pedal y una caja metálica ya perforada; dependiendo de la selección de componentes puede ir desde un overdrive a un fuzz cochinón.',
+      'Está pensado para personas sin conocimientos o iniciándose en la electrónica: la idea es empezar con este circuito relativamente simple para después abordar proyectos más complejos en el futuro.',
+    ],
+    hours: 'Sábados de 10:00 a 15:00 hrs',
+    place: 'Providencia, Santiago',
     category: 'educativa',
     imageUrl: '/images/taller-electra-dist.png',
     imageAlt: 'Pedal Electra Distortion en caja metálica con perilla azul, LED rojo encendido, placa perforada y componentes electrónicos',
@@ -49,7 +55,7 @@ export const INITIAL_WORKSHOPS: WorkshopItem[] = [
     published: true,
     durationHours: 5,
     level: 'Principiante',
-    materialsIncluded: true,
+    // materialsIncluded: true,
     price: 55000,
     stages: [
       {
@@ -165,7 +171,13 @@ export const INITIAL_WORKSHOPS: WorkshopItem[] = [
     title: 'TALLER DE FABRICACIÓN DE FUZZ FACE',
     slug: 'taller-fabricacion-fuzz-face',
     summary: 'Arma el circuito Fuzz Face, analízalo en detalle y explora posibilidades de modificación. Dirigido a exalumnos o personas con conocimientos de electrónica y práctica soldando.',
-    description: 'El taller consistirá en armar el circuito Fuzz Face, analizarlo y ver distintas posibilidades de modificación del circuito. El valor es de $55.000 y se realiza en Santiago, comuna de Providencia, el último sábado de cada mes de 10:00 a 15:00 hrs. Incluye todos los componentes necesarios para armar el pedal y una caja metálica ya perforada. Está pensado para personas que ya hayan participado de versiones anteriores o que puedan demostrar conocimientos básicos de electrónica y sean capaces de soldar.',
+    description: [
+      'El taller consistirá en armar el circuito Fuzz Face, analizarlo y ver distintas posibilidades de modificación del circuito.',
+      'Incluye todos los componentes necesarios para armar el pedal y una caja metálica ya perforada.',
+      'Está pensado para personas que ya hayan participado de versiones anteriores o que puedan demostrar conocimientos básicos de electrónica y sean capaces de soldar.',
+    ],
+    hours: 'Sábados de 10:00 a 15:00 hrs',
+    place: 'Providencia, Santiago',
     category: 'educativa',
     imageUrl: '/images/taller-fuzz-face.png',
     imageAlt: 'Pedal Fuzz Face terminado en caja metálica con dos perillas negras, footswitch, LED verde y cables conectados',
@@ -174,7 +186,7 @@ export const INITIAL_WORKSHOPS: WorkshopItem[] = [
     published: true,
     durationHours: 5,
     level: 'Intermedio',
-    materialsIncluded: true,
+    // materialsIncluded: true,
     price: 55000,
     stages: [
       {

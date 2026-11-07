@@ -15,16 +15,17 @@ const { idPrefix = 'newsletter', class: className = '' } = Astro.props;
     <span class={styles.badge}>[ MAILING LIST & NOVEDADES ]</span>
     <h2 class={styles.title}>SUSCRÍBETE A NOVEDADES Y TALLERES</h2>
     <p class={styles.description}>
-      Recibe avisos antes de que se abran nuevas fechas de talleres presenciales, lanzamientos de kits DIY y guías de electrónica analógica. Sin spam, solo contenido del taller.
+      Recibe avisos antes de que se abran nuevas fechas de talleres presenciales, lanzamientos de kits DIY y guías de electrónica analógica. 
     </p>
   </div>
-
+  <!-- <span>* Sin spam, solo contenido del taller. *</span> -->
+  
   <form id={`${idPrefix}-form`} class={styles.form} data-newsletter-form novalidate>
     <div class="sr-only" aria-hidden="true">
       <label for={`${idPrefix}-website`}>Sitio web (dejar en blanco)</label>
       <input type="text" id={`${idPrefix}-website`} name="website" tabindex="-1" autocomplete="off" />
     </div>
-
+    
     <div class={styles.inputWrapper}>
       <label for={`${idPrefix}-email`} class="sr-only">
         Correo electrónico para suscripción al newsletter
@@ -33,7 +34,7 @@ const { idPrefix = 'newsletter', class: className = '' } = Astro.props;
         <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
       </svg>
       <input
-        type="email"
+      type="email"
         id={`${idPrefix}-email`}
         name="email"
         required
@@ -41,13 +42,13 @@ const { idPrefix = 'newsletter', class: className = '' } = Astro.props;
         placeholder="tu-correo@ejemplo.com"
         class={styles.input}
         autocomplete="email"
-      />
-    </div>
-
-    <Button type="submit" variant="accentPink" size="md" id={`${idPrefix}-submit-btn`}>
-      SUSCRIBIRME
-    </Button>
-  </form>
+        />
+      </div>
+      
+      <Button type="submit" variant="accentPink" size="md" id={`${idPrefix}-submit-btn`}>
+        SUSCRIBIRME
+      </Button>
+    </form>
 
   <div
     id={`${idPrefix}-status`}

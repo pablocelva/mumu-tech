@@ -26,13 +26,23 @@ export const OptionalHttpUrlSchema = z
   .optional()
   .or(z.literal(''));
 
+export const ItemDescriptionSchema = z.union([
+  z.string().trim().min(20, 'La descripción detallada debe tener al menos 20 caracteres').max(5000),
+  z
+    .array(
+      z.string().trim().min(5, 'Cada punto de la descripción debe tener al menos 5 caracteres').max(1500)
+    )
+    .min(1, 'Debes incluir al menos un punto en la descripción')
+    .max(20, 'Máximo 20 puntos en la descripción'),
+]);
+
 export const BaseItemSchema = z.object({
   id: z.string().min(1, 'El ID es requerido').max(100),
   code: z.string().regex(/^\d{3}$/, 'El código debe tener 3 dígitos (ej: 001)'),
   title: z.string().min(3, 'El título debe tener al menos 3 caracteres').max(180),
   slug: z.string().min(2, 'El slug es requerido').max(180),
   summary: z.string().min(10, 'El resumen debe tener al menos 10 caracteres').max(500),
-  description: z.string().min(20, 'La descripción detallada debe tener al menos 20 caracteres').max(5000),
+  description: ItemDescriptionSchema,
   category: CategoryEnum,
   imageUrl: SafeImageUrlSchema,
   imageAlt: z.string().min(3, 'El texto alternativo es requerido').max(250),
@@ -95,6 +105,8 @@ export const WorkshopPastEditionSchema = z.object({
 
 export const WorkshopSchema = BaseItemSchema.extend({
   category: z.literal('educativa'),
+  hours: z.string().trim().min(3, 'El horario debe tener al menos 3 caracteres').max(160).optional(),
+  place: z.string().trim().min(3, 'El lugar debe tener al menos 3 caracteres').max(160).optional(),
   durationHours: z.number().positive().optional(),
   level: z.enum(['Principiante', 'Intermedio', 'Avanzado']).optional(),
   materialsIncluded: z.boolean().optional(),

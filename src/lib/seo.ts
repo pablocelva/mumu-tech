@@ -57,15 +57,19 @@ export function generateLocalBusinessSchema() {
  */
 export function generateCourseSchema(workshop: {
   title: string;
-  description: string;
+  description: string | string[];
   price?: number;
   durationHours?: number;
 }) {
+  const descriptionText = Array.isArray(workshop.description)
+    ? workshop.description.join(' ')
+    : workshop.description;
+
   return {
     '@context': 'https://schema.org',
     '@type': 'Course',
     name: workshop.title,
-    description: workshop.description,
+    description: descriptionText,
     provider: {
       '@type': 'Organization',
       name: 'Mumu Tech',
@@ -79,5 +83,27 @@ export function generateCourseSchema(workshop: {
           category: 'Taller de Electrónica',
         }
       : undefined,
+  };
+}
+
+/**
+ * Generates standardized SEO metadata and safe display pathname for 404 responses.
+ */
+export function getNotFoundMetadata(pathname = '/404'): {
+  title: string;
+  description: string;
+  robots: string;
+  requestedPath: string;
+} {
+  const normalized = pathname.trim() || '/404';
+  const requestedPath =
+    normalized.length > 80 ? `${normalized.slice(0, 77)}...` : normalized;
+
+  return {
+    title: '404 · Página no encontrada | Mumu Tech',
+    description:
+      'La ruta solicitada no existe o cambió de ubicación. Explora nuestros talleres de pedales DIY, servicios técnicos y proyectos.',
+    robots: 'noindex, nofollow',
+    requestedPath,
   };
 }

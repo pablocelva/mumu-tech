@@ -1,0 +1,102 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Button from '../components/Button.astro';
+import { getNotFoundMetadata } from '../lib/seo';
+import styles from '../styles/NotFound.module.css';
+
+export const prerender = false;
+
+Astro.response.status = 404;
+
+const meta = getNotFoundMetadata(Astro.url.pathname);
+
+const recoveryRoutes = [
+  {
+    title: 'Talleres Educativos',
+    href: '/educativa',
+    description: 'Fechas disponibles, programas e inscripción para fabricar tus propios pedales desde cero.',
+  },
+  {
+    title: 'Servicios & Tickets',
+    href: '/servicios',
+    description: 'Diagnóstico, reparación de equipos y modificaciones clásicas de pedales con número de ticket.',
+  },
+  {
+    title: 'Cosas Interesantes',
+    href: '/cosas-interesantes',
+    description: 'Archivo de proyectos DIY, sintetizadores experimentales y electrónica sonora analógica.',
+  },
+  {
+    title: 'Contacto Directo',
+    href: '/contacto',
+    description: 'Escríbenos si buscabas una página específica, un taller pasado o información puntual.',
+  },
+];
+---
+
+<Layout
+  title={meta.title}
+  description={meta.description}
+  robots={meta.robots}
+>
+  <div class={styles.wrapper}>
+    <section class={styles.heroCard}>
+      <div class={styles.statusRow}>
+        <span class={styles.errorCodeBadge}>
+          <span aria-hidden="true">⚠</span>
+          <span>[ ERROR 404 · CIRCUITO ABIERTO ]</span>
+        </span>
+        <svg
+          class={styles.signalWave}
+          width="88"
+          height="20"
+          viewBox="0 0 88 20"
+          fill="none"
+          aria-hidden="true"
+        >
+          <path
+            d="M2 10H18L24 3L32 17L38 10H48M60 10H86"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="square"
+          />
+          <circle cx="54" cy="10" r="2" fill="#ff2a85" />
+        </svg>
+      </div>
+
+      <h1 id="not-found-heading" class={styles.title}>
+        PÁGINA NO ENCONTRADA
+      </h1>
+
+      <p class={styles.lead}>
+        La dirección <code class={styles.requestedPath}>{meta.requestedPath}</code> no existe, fue movida o ya no se encuentra habilitada. Revisa que la URL esté bien escrita o continúa desde alguna de las secciones principales.
+      </p>
+
+      <div class={styles.actions}>
+        <Button href="/" variant="primary" size="lg">
+          VOLVER AL INICIO
+        </Button>
+        <Button href="/educativa" variant="secondary" size="lg">
+          VER TALLERES DISPONIBLES
+        </Button>
+      </div>
+    </section>
+
+    <nav class={styles.recoverySection} aria-label="Secciones principales sugeridas">
+      <h2 class={styles.recoveryHeading}>[ RUTAS DISPONIBLES EN MUMU TECH ]</h2>
+      <ul class={styles.linksGrid} role="list">
+        {recoveryRoutes.map((route) => (
+          <li>
+            <a href={route.href} class={styles.linkCard}>
+              <div class={styles.linkHeader}>
+                <span class={styles.linkTitle}>{route.title}</span>
+                <span class={styles.linkArrow} aria-hidden="true">→</span>
+              </div>
+              <p class={styles.linkDesc}>{route.description}</p>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+</Layout>
